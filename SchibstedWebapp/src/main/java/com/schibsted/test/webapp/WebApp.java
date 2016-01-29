@@ -45,17 +45,17 @@ public class WebApp {
 
 	private static final String testUserRol1Name = "user1";
 	private static final String testUserRol1Password = "user1";
-	private static final Rol[] testUserRol1Rols = { Rol.PAGE_1 };
+	private static final Rol[] testUserRol1Rols = { Rol.PAGE1 };
 	private static final User user1 = new User(testUserRol1Name, SecurityHelper.getPasswordHash(testUserRol1Password), Arrays.asList(testUserRol1Rols));
 
 	private static final String testUserRol2Name = "user2";
 	private static final String testUserRol2Password = "user2";
-	private static final Rol[] testUserRol2Rols = { Rol.PAGE_2 };
+	private static final Rol[] testUserRol2Rols = { Rol.PAGE2 };
 	private static final User user2 = new User(testUserRol2Name, SecurityHelper.getPasswordHash(testUserRol2Password), Arrays.asList(testUserRol2Rols));
 
 	private static final String testUserRol3Name = "user3";
 	private static final String testUserRol3Password = "user3";
-	private static final Rol[] testUserRol3Rols = { Rol.PAGE_3 };
+	private static final Rol[] testUserRol3Rols = { Rol.PAGE2 };
 	private static final User user3 = new User(testUserRol3Name, SecurityHelper.getPasswordHash(testUserRol3Password), Arrays.asList(testUserRol3Rols));
 	
 	private static final User[] defaultUsers={defaultAdminUser, user1, user2, user3};

@@ -1,13 +1,9 @@
 package com.schibsted.test.webapp.core.session;
 
-import java.util.Date;
-
-import com.schibsted.test.webapp.model.User;
-
 public class SessionBean {
 	private Integer userId=null;
 	private String sessionId=null;
-	private Date lastRequestTimestamp=null;
+	private long lastRequestTimestamp;
 	
 	public SessionBean() {
 		super();
@@ -16,7 +12,7 @@ public class SessionBean {
 
 	
 
-	public SessionBean(Integer userId, String sessionId, Date lastRequestTimestamp) {
+	public SessionBean(Integer userId, String sessionId, long lastRequestTimestamp) {
 		super();
 		this.userId = userId;
 		this.sessionId = sessionId;
@@ -24,25 +20,35 @@ public class SessionBean {
 	}
 	
 
-	public Date getLastRequestTimestamp() {
+	
+
+
+
+	public long getLastRequestTimestamp() {
 		return lastRequestTimestamp;
 	}
 
 
 
-	public void setLastRequestTimestamp(Date lastRequestTimestamp) {
+	public void setLastRequestTimestamp(long lastRequestTimestamp) {
 		this.lastRequestTimestamp = lastRequestTimestamp;
 	}
 
 
 
+	
+
 	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUser(Integer userId) {
+
+
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
+
+
 
 	public String getSessionId() {
 		return sessionId;

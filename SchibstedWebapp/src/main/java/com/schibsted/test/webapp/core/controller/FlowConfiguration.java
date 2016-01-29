@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.relation.Role;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -15,7 +16,6 @@ import com.schibsted.test.webapp.WebApp;
 import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
 import com.schibsted.test.webapp.controller.flowconfig.beans.FlowConfig;
 import com.schibsted.test.webapp.controller.flowconfig.beans.Forward;
-import com.schibsted.test.webapp.controller.flowconfig.beans.Role;
 
 /**
  * Singleton pattern (Eager loading) implementation to storage application flow configuration in
@@ -93,6 +93,10 @@ public class FlowConfiguration {
 	
 
 	
+	
+	
+	
+	
 	//TODO: TOT AIXO VA CAP A FlowConfigurationHelper
 	
 	public BusinessAction getBusinessActionFromURI(URI requestURI){
@@ -114,15 +118,24 @@ public class FlowConfiguration {
 		return optionalAction.map(action -> action.isAuthenticated()).orElse(false);
 	}
 	
-	public List<Role> getAutorizedRols(URI requestURI){
+	/*public List<Role> getAutorizedRols(URI requestURI){
 		Optional<BusinessAction> optionalAction=getOptionalBusinessActionFromURI(requestURI);
 		Optional<List<Role>> optionalRolsList=optionalAction.map(roles -> roles.getAccesRoles()).map(rol -> rol.getRole());
 		return optionalRolsList.get();
+	}*/
+	
+	public String getAutorizedRol(URI requestURI){
+		String role=null;
+		Optional<BusinessAction> optionalAction=getOptionalBusinessActionFromURI(requestURI);
+		if(optionalAction.isPresent()){
+			role=optionalAction.get().getAccesRole();
+		}
+		return role;
 	}
 	
 	public boolean isAuthorizatedURI(URI requestURI){
-		List<Role> roles=getAutorizedRols(requestURI);
-		return roles.size()>0;
+		String role=getAutorizedRol(requestURI);
+		return role!=null && !role.isEmpty();
 	}
 	
 	public String getActionForwardPath(String actionClassName, String forwardName){

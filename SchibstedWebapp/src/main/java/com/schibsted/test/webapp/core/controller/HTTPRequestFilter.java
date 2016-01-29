@@ -2,10 +2,16 @@ package com.schibsted.test.webapp.core.controller;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
+import com.schibsted.test.webapp.core.exceptions.DAOException;
 import com.schibsted.test.webapp.core.session.UserSessionManager;
 import com.schibsted.test.webapp.core.session.UserSessionStorage;
+import com.schibsted.test.webapp.dao.UserDAO;
+import com.schibsted.test.webapp.model.IRolTypes.Rol;
+import com.schibsted.test.webapp.model.User;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -21,40 +27,57 @@ public class HTTPRequestFilter extends Filter {
 
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
-		// TODO Auto-generated method stub
+		boolean correctAcces=true;
 		System.out.println("REQUEST FILTER");
 		
 		//contentTypeValidation(exchange);
 		
 		URI requestURI = exchange.getRequestURI();
 		FlowConfiguration fc = FlowConfiguration.getInstance();
+
 		BusinessAction actionBean = fc.getBusinessActionFromURI(requestURI);
 		
 		//Validate user authentication
 		if (actionBean.isAuthenticated()) {
 			System.out.println("valida sesion");
 			if(!cookieSessionValidation(exchange)){
-				//TODO pendent headers i tal
 				HelperController.sendStaticView(exchange,"/loginNOK.html");
-			}
+				correctAcces=false;
+			}else{
 			
-			//Validate user autorization
-			if(actionBean.getAccesRoles()!=null){
-				//validar si user.rol eta a llista acces rol (son 2 llistes!)
-				
+				//VALIDATE USER AUTORIZATION
+				//if(FlowConfiguration.getInstance().isAuthorizatedURI(requestURI))
+				if(actionBean.getAccesRole()!=null && !actionBean.getAccesRole().isEmpty()){
+					//Getting user from sessionId
+					String sessionId=HelperController.getSessionIdFromCookie(exchange);
+					Integer userId=UserSessionManager.getUserIdBySessionId(sessionId, UserSessionStorage.getInstance());
+					UserDAO<User> dao=new UserDAO<User>();
+					try {
+						User user = dao.getById(userId);
+						List<Rol> userRoles=user.getRols();
+						String a=userRoles.get(0).toString();
+						
+						Optional<Rol> optionalRol=userRoles.stream().filter(rol -> rol.toString().equals( actionBean.getAccesRole().toUpperCase())).findFirst();
+						if(!optionalRol.isPresent()){
+							System.out.println("USUARI NO AUTORIZAT!");
+							HelperController.sendError(exchange, 405, "pues eso que no puedes acceder");
+							correctAcces=false;
+						}
+					} catch (DAOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
-			
 		}
-		
-		
-		
-		chain.doFilter(exchange);
+		if(correctAcces){
+			chain.doFilter(exchange);
+		}
 	}
 
 	//TODO: NOT WORKS
 	private boolean contentTypeValidation(HttpExchange exchange){
 		return exchange.getRequestHeaders().getFirst("Content-Type").trim().equals("text/html");
-		
 	}
 	
 	private boolean cookieSessionValidation(HttpExchange exchange) {
@@ -71,4 +94,6 @@ public class HTTPRequestFilter extends Filter {
 		}
 		return userLogged;
 	}
+	
+	
 }

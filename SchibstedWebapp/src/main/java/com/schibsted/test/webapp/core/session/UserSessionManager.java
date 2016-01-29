@@ -45,7 +45,7 @@ public class UserSessionManager {
 	 */
 	public static String createNewSession(int userId,UserSessionStorage sessionStorage){
 		String sessionId=SecurityHelper.generateNewSessionId();
-		SessionBean newSession=new SessionBean(userId,sessionId,new Date());
+		SessionBean newSession=new SessionBean(userId,sessionId,new Date().getTime());
 		sessionStorage.getActiveSessions().put(sessionId, newSession);
 		return sessionId;
 	}
@@ -65,18 +65,22 @@ public class UserSessionManager {
 
 	private static boolean validateSessionNotExpired(SessionBean sessionBean){
 		
-		Date lastUserEvent=sessionBean.getLastRequestTimestamp();
+		long lastUserEvent=sessionBean.getLastRequestTimestamp();
+		long expirationTimeFromLasUserevent=lastUserEvent+ USER_SESSION_ALIVE_MINUTES * ONE_MINUTE_IN_MILLIS;
+		long now=new Date().getTime();
+		
+		return now<expirationTimeFromLasUserevent;
+		
+		/*long expirationTime=sessionBean.getLastRequestTimestamp();
 		Date afterAddingTenMins=new Date();
 		afterAddingTenMins.setTime(afterAddingTenMins.getTime()+ USER_SESSION_ALIVE_MINUTES * ONE_MINUTE_IN_MILLIS);
-		return lastUserEvent.compareTo(afterAddingTenMins)<0;
+		return lastUserEvent.compareTo(afterAddingTenMins)<0;*/
 		
 	}
 	
 	private static void updateUserSessionTimestamp(SessionBean sessionBean){
-		Date newExpirationDate=new Date();
-		long newTimestamp=newExpirationDate.getTime()+USER_SESSION_ALIVE_MINUTES * ONE_MINUTE_IN_MILLIS;
-		newExpirationDate.setTime(newTimestamp);
-		sessionBean.setLastRequestTimestamp(newExpirationDate);
+		long newTimestamp=new Date().getTime()+USER_SESSION_ALIVE_MINUTES * ONE_MINUTE_IN_MILLIS;
+		sessionBean.setLastRequestTimestamp(newTimestamp);
 	}
 		
 	
