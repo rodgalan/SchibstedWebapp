@@ -13,7 +13,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import com.schibsted.test.webapp.WebApp;
+import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
+import com.schibsted.test.webapp.controller.flowconfig.beans.Forward;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -42,7 +46,7 @@ class HelperController {
 			newLocation=newLocation.concat("?").concat("message=").concat(bean.getMessage());
 		}
 		
-		exchange.getResponseHeaders().add("Location", "/webapp/" + newLocation);
+		exchange.getResponseHeaders().add("Location", "/webapp" + newLocation);
 		exchange.sendResponseHeaders(302, 0);
 		exchange.getResponseBody().close();
 	}
@@ -74,8 +78,8 @@ class HelperController {
 	 */
 	static void sendError(HttpExchange exchange, int httpStatusError , String httpStatusDescription) throws IOException {
 		setResponseHeaders(exchange);
-		OutputStream os = exchange.getResponseBody();
 		exchange.sendResponseHeaders(httpStatusError, httpStatusDescription.length());
+		OutputStream os = exchange.getResponseBody();
 		try{
 			os.write(httpStatusDescription.toString().getBytes());
 		}finally{
@@ -313,6 +317,13 @@ class HelperController {
 		return schibstedWebappSessionId;
 
 	}
-
+	
+	static String getPathFromURI(URI uri) {
+		String relativePath = null;
+		if (uri != null && uri.getPath() != null) {
+			relativePath = uri.getPath().substring(WebApp.applicationContext.length() - 1).trim().toLowerCase();
+		}
+		return relativePath;
+	}
 
 }

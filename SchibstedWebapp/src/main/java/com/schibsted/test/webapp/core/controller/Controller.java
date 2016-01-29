@@ -81,20 +81,36 @@ public class Controller implements HttpHandler {
 
 						HelperController.setCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
 					}
-
-					switch (forward.getType()) {
-					case STATIC:
-						HelperController.sendStaticView(exchange, forward.getPath());
-						break;
-					case DYNAMIC:
-						HelperController.sendDynamicView(exchange, forward.getPath(), viewBean);
-						break;
-					case REDIRECT:
-						HelperController.redirectPage(exchange, forward.getPath(), viewBean);
-						break;
-
-					default: // @TODO Error de configuracio.
-								// ConfigErrorException
+					
+					if(forward.getType()!=null){
+						switch (forward.getType()) {
+						case STATIC:
+							
+							HelperController.sendStaticView(exchange, forward.getPath());
+							break;
+						case DYNAMIC:
+							HelperController.sendDynamicView(exchange, forward.getPath(), viewBean);
+							break;
+						case REDIRECT:
+							// If exists redirectPath redirect to this (dynamic redirection), else redirects to the forward specified in configuration.xml and selected by action 
+							String redirectPath=null;
+							if(viewBean!=null && viewBean.getRedirectLocation()!=null && !viewBean.getRedirectLocation().isEmpty()){
+								redirectPath=viewBean.getRedirectLocation();
+							}else if(forward.getPath()!=null && !forward.getPath().isEmpty()){
+								redirectPath=forward.getPath();
+							} else{
+								HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+								//Not Forward not redirect found (log)
+							}
+							HelperController.redirectPage(exchange, redirectPath, viewBean);
+							break;
+	
+						default: // @TODO Error de configuracio.
+									// ConfigErrorException
+						}
+					}else{
+						//Forward not found (log)
+						HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 					}
 				}
 

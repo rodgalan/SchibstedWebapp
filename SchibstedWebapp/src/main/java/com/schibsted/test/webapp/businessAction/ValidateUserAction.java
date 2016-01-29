@@ -34,11 +34,13 @@ public class ValidateUserAction implements IBusinessActionLayer{
 		System.out.println("Getting POST parameters");
 		List<String> usernameList=requestParameters.get("username");
 		List<String> passwordList=requestParameters.get("password");
+		List<String> redirectTo=requestParameters.get("goesto");
 		
 		//1. Getting parameters
 		if(usernameList!=null && usernameList.size()==1 & passwordList!=null && passwordList.size()==1 && usernameList.get(0)!=null && passwordList.get(0)!=null){
 			String username=usernameList.get(0);
 			String password=passwordList.get(0);
+			
 			
 			//Get password hash
 			String hashpassword=SecurityHelper.getPasswordHash(password);
@@ -49,11 +51,15 @@ public class ValidateUserAction implements IBusinessActionLayer{
 				Predicate<User> getUserCondition=(usu -> usu.getUsername().equals(username) && usu.getPasssword().equals(hashpassword));
 				User userLogged = dao.findItemByCondition(getUserCondition);
 				if(userLogged!=null){
-					//Creates new session (now is correct for server, nedded to say it to user
+					//Creates new session (now is correct for server, nedded say it to user)
 					String session=UserSessionManager.createNewSession(userLogged.getUserId(),UserSessionStorage.getInstance());
 					sessionBean = new LoginSessionBean(session);
 					sessionBean.setForwardName(FORWARD_SUCCESS);
-					sessionBean.setMessage(MESSAGE_SUCCESS.replaceAll(USERNAME_TAG, username));
+					
+					if(redirectTo!=null && redirectTo.size()==1){
+						sessionBean.setRedirectLocation(redirectTo.get(0));
+					}
+					//sessionBean.setMessage(MESSAGE_SUCCESS.replaceAll(USERNAME_TAG, username));
 				}
 			} catch (DAOException e) {
 				// TODO Auto-generated catch block

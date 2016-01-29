@@ -158,16 +158,11 @@ public class FlowConfiguration {
 	
 	
 
-	private String getPathFromURI(URI uri) {
-		String relativePath = null;
-		if (uri != null && uri.getPath() != null) {
-			relativePath = uri.getPath().substring(WebApp.applicationContext.length() - 1).trim().toLowerCase();
-		}
-		return relativePath;
-	}
+	
 	
 	private Optional<BusinessAction> getOptionalBusinessActionFromURI(URI requestURI) {
-		String path=getPathFromURI(requestURI).trim().toLowerCase();
+		//String path=HelperController.getPathFromURI(requestURI).trim().toLowerCase();
+		String path=HelperController.getPathFromURI(requestURI);
 		List<BusinessAction> actions=flowConfiguration.getBusinessAction();
 		Optional<BusinessAction> optionalAction=actions.stream().filter(action -> action.getPath().trim().toLowerCase().equals(path)).findFirst();
 		return optionalAction;

@@ -12,6 +12,7 @@ import com.schibsted.test.webapp.core.session.UserSessionStorage;
 import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.IRolTypes.Rol;
 import com.schibsted.test.webapp.model.User;
+import com.schibsted.test.webapp.viewBean.LoginPageBean;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -30,6 +31,11 @@ public class HTTPRequestFilter extends Filter {
 		boolean correctAcces=true;
 		System.out.println("REQUEST FILTER");
 		
+		this.validateResource(exchange); 
+		
+		//Resource unknown
+		
+		
 		//contentTypeValidation(exchange);
 		
 		URI requestURI = exchange.getRequestURI();
@@ -41,11 +47,26 @@ public class HTTPRequestFilter extends Filter {
 		if (actionBean.isAuthenticated()) {
 			System.out.println("valida sesion");
 			if(!cookieSessionValidation(exchange)){
-				HelperController.sendStaticView(exchange,"/loginNOK.html");
+				
+				
+				//HelperController.sendStaticView(exchange,"/loginNOK.html"); //este estaba
+				//HelperController.sendStaticView(exchange,"/login");  //este no deberia ir
+				
+				LoginPageBean viewBean=new LoginPageBean();
+				viewBean.setMessage("RESTRICTED ACCES TO "+requestURI.getPath()+". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
+				viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI));
+				try {
+					HelperController.sendDynamicView(exchange, "com.schibsted.test.webapp.view.LoginView", viewBean);
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			
 				correctAcces=false;
 			}else{
 			
-				//VALIDATE USER AUTORIZATION
+				//VALIDATE USER AUTHORIZATION
 				//if(FlowConfiguration.getInstance().isAuthorizatedURI(requestURI))
 				if(actionBean.getAccesRole()!=null && !actionBean.getAccesRole().isEmpty()){
 					//Getting user from sessionId
@@ -93,6 +114,15 @@ public class HTTPRequestFilter extends Filter {
 			userLogged = UserSessionManager.validateSession(schibstedWebappSessionId, sessionStorage);
 		}
 		return userLogged;
+	}
+	
+	private void validateResource(HttpExchange exchange) throws IOException{
+		URI requestURI = exchange.getRequestURI();
+		if(FlowConfiguration.getInstance().getActionNameFromURI(requestURI)==null){
+			HelperController.sendError(exchange, 404, "404: PAGE NOT FOUND");
+		}
+		
+		
 	}
 	
 	

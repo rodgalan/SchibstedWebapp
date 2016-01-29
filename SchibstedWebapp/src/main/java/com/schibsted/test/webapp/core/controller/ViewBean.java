@@ -22,14 +22,11 @@ public class ViewBean {
 	 */
 	private String message=null;
 	
+	/**
+	 * Used with type="redirect" to fix the redirect path
+	 */
+	private String redirectLocation=null;
 	
-	
-
-	public ViewBean(String forwardName) {
-		super();
-		this.forwardName = forwardName;
-	}
-
 	public ViewBean() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -49,5 +46,13 @@ public class ViewBean {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getRedirectLocation() {
+		return redirectLocation;
+	}
+
+	public void setRedirectLocation(String redirectLocation) {
+		this.redirectLocation = redirectLocation;
 	}
 }
