@@ -50,6 +50,18 @@ public class UserSessionManager {
 		return sessionId;
 	}
 	
+	
+	/**
+	 * Delete userSession
+	 * @param userId
+	 * @param sessionStorage
+	 * @return
+	 */
+	public static boolean deleteSession(String sessionId, UserSessionStorage sessionStorage){
+		HashMap<String, SessionBean> activeSessions=sessionStorage.getActiveSessions();
+		return activeSessions.remove(sessionId)!=null;
+	}
+	
 
 	private static boolean validateSessionNotExpired(SessionBean sessionBean){
 		

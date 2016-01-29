@@ -29,13 +29,25 @@ public class HTTPRequestFilter extends Filter {
 		URI requestURI = exchange.getRequestURI();
 		FlowConfiguration fc = FlowConfiguration.getInstance();
 		BusinessAction actionBean = fc.getBusinessActionFromURI(requestURI);
+		
+		//Validate user authentication
 		if (actionBean.isAuthenticated()) {
 			System.out.println("valida sesion");
 			if(!cookieSessionValidation(exchange)){
 				//TODO pendent headers i tal
 				HelperController.sendStaticView(exchange,"/loginNOK.html");
 			}
+			
+			//Validate user autorization
+			if(actionBean.getAccesRoles()!=null){
+				//validar si user.rol eta a llista acces rol (son 2 llistes!)
+				
+			}
+			
 		}
+		
+		
+		
 		chain.doFilter(exchange);
 	}
 

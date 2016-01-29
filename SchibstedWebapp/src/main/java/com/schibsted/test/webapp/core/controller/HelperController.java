@@ -32,7 +32,8 @@ class HelperController {
 	
 	//Base file path om wich static pages are allocated. 
 	//TODO GETS BETTER in config file!!
-	static final String baseFileViewPath = "C:/Users/Anna/workspaceSH_Mars1/webapp/src/main/webapp/WEB-INF/views";
+	//static final String baseFileViewPath = "C:/Users/Anna/workspaceSH_Mars1/webapp/src/main/webapp/WEB-INF/views";
+	private final static String BASE_STATIC_VIEW_PATH="/resources/staticViews";
 	
 	
 	static void redirectPage(HttpExchange exchange, String newLocation, ViewBean bean) throws IOException { 
@@ -103,15 +104,36 @@ class HelperController {
 
 	// TODO Metode copiat decontroller, esta duplicat!
 	static void sendStaticView(HttpExchange exchange, String pathPage) throws IOException {
-		String filePath = baseFileViewPath.concat(pathPage);
+		String filePath = BASE_STATIC_VIEW_PATH.concat(pathPage);
 		OutputStream os = exchange.getResponseBody();
+		
+		
 		// slash is platorm indepenendent. ensure please!
-		File file = new File(filePath).getCanonicalFile();
-
+		//File file = new File(filePath).getCanonicalFile();
+		InputStream htmlStream=FlowConfiguration.class.getResourceAsStream(filePath);
+		byte[] contents = new byte[1024];
+		int bytesRead=0;
+		String strhtml=null;
+		try{
+			while( (bytesRead = htmlStream.read(contents)) != -1){ 
+				 strhtml = new String(contents, 0, bytesRead);               
+			}
+		}finally{
+			htmlStream.close();
+		}
+		
+		
 		setResponseHeaders(exchange);
-		exchange.sendResponseHeaders(200, file.length()); // redirect
+		exchange.sendResponseHeaders(200, strhtml.length()); // redirect
+		
+		try{
+			os.write(strhtml.toString().getBytes());
+		}finally{
+			os.close();
+		}
+		
 
-		FileInputStream fs = new FileInputStream(file);
+		/*FileInputStream fs = new FileInputStream(file);
 		final byte[] buffer = new byte[0x10000];
 		try{
 			int count = 0;
@@ -121,7 +143,7 @@ class HelperController {
 		}finally{
 			fs.close();
 			os.close();
-		}
+		}*/
 	}
 
 	static Map<String, List<String>> getGETParameters(HttpExchange exchange) throws IOException {

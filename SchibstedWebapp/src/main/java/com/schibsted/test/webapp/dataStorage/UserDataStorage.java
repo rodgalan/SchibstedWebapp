@@ -3,12 +3,10 @@ package com.schibsted.test.webapp.dataStorage;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.schibsted.test.webapp.WebApp;
 import com.schibsted.test.webapp.core.security.SecurityHelper;
@@ -36,10 +34,27 @@ public class UserDataStorage {
 
 	private static final Logger log = Logger.getLogger(WebApp.class.getName());
 
-	// Default admin user (potser ho acabo posant en un fitxer de configuració i que es carregui amb el main)
-	private static final String defaultAdminUserName = "admin";
+
+	//TODO GETS BETTER: Initial users in config file!
+	//TODO GETS BETTER: Load initial users from main 
+	
+	// Default admin user
+	/*private static final String defaultAdminUserName = "admin";
 	private static final String defaultAdminUserPassword = "admin";
 	private static final Rol[] defaultAdminRols = { Rol.ADMIN };
+	
+	//Inital Test Users for the PoC
+	private static final String testUserRol1Name = "user1";
+	private static final String testUserRol1Password = "user1";
+	private static final Rol[] testUserRol1Rols = { Rol.PAGE_1 };
+	
+	private static final String testUserRol2Name = "user2";
+	private static final String testUserRol2Password = "user2";
+	private static final Rol[] testUserRol2Rols = { Rol.PAGE_2 };
+	
+	private static final String testUserRol3Name = "user3";
+	private static final String testUserRol3Password = "user3";
+	private static final Rol[] testUserRol3Rols = { Rol.PAGE_3 };*/
 
 	private static HashMap<Integer, User> users; //TODO crec que aixo deixa de ser un hashmap
 	
@@ -52,12 +67,24 @@ public class UserDataStorage {
 	//private static volatile UserDataStorage instance = new UserDataStorage(); LAZY LOADING NOT NEEDED
 	private static final UserDataStorage instance = new UserDataStorage(); 
 
-	private static User defaultAdminUser() {
+	/*private static User defaultAdminUser() {
 		log.log(Level.INFO, "Creating default user admin");
 		List<Rol> adminRols = Arrays.asList(defaultAdminRols);
 		User defaultAdminUser = new User(defaultAdminUserName, SecurityHelper.getPasswordHash(defaultAdminUserPassword), adminRols);
+		
+		List<Rol> user1Rols = Arrays.asList(testUserRol1Rols);
+		User user1User = new User(testUserRol1Name, SecurityHelper.getPasswordHash(testUserRol1Password), user1Rols);
+		
+		List<Rol> user2Rols = Arrays.asList(testUserRol2Rols);
+		User user2User = new User(testUserRol2Name, SecurityHelper.getPasswordHash(testUserRol2Password), user2Rols);
+		
+		List<Rol> user3Rols = Arrays.asList(testUserRol3Rols);
+		User user3User = new User(testUserRol3Name, SecurityHelper.getPasswordHash(testUserRol3Password), user3Rols);
+		
 		return defaultAdminUser;
-	}
+	}*/
+	
+	
 
 	
 	private UserDataStorage() {
@@ -69,8 +96,8 @@ public class UserDataStorage {
 		}
 		
 		users = new HashMap<Integer, User>();
-		User defaultAdminUser = defaultAdminUser();
-		this.setUser(defaultAdminUser);
+		//User defaultAdminUser = defaultAdminUser();
+		//this.setUser(defaultAdminUser);
 	}
 
 	

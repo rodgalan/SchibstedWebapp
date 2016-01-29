@@ -1,6 +1,6 @@
 package com.schibsted.test.webapp.core.controller;
 
-import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +31,8 @@ import com.schibsted.test.webapp.controller.flowconfig.beans.Role;
 public class FlowConfiguration {
 	private static final Logger log = Logger.getLogger(WebApp.class.getName());
 	private static FlowConfig flowConfiguration;
+	
+	private final static String CONF_FILE_PATH="/resources/config/configuration.xml";
 
 	// private static volatile FlowConfiguration instance = null; LAZY LOADING
 	// NOT NEEDED
@@ -59,12 +61,14 @@ public class FlowConfiguration {
 		return instance;
 	}
 
-	private static void loadFlowconfiguration() {
-		File file = new File("C:/Users/Anna/workspaceSH_Mars1/webapp/src/main/webapp/WEB-INF/mvc/configuration.xml");
+	private static void loadFlowconfiguration() {	
+		InputStream configStream=FlowConfiguration.class.getResourceAsStream(CONF_FILE_PATH);
+	
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(FlowConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			flowConfiguration = (FlowConfig) jaxbUnmarshaller.unmarshal(file);
+			//flowConfiguration = (FlowConfig) jaxbUnmarshaller.unmarshal(file);
+			flowConfiguration = (FlowConfig) jaxbUnmarshaller.unmarshal(configStream);
 			System.out.println(flowConfiguration);
 		} catch (JAXBException e) {
 			// TODO Podemos crear una excepcion custom molona que se lance y al
