@@ -26,34 +26,42 @@ public class HTTPRequestFilter extends Filter {
 		return FILTER_DESC;
 	}
 
+	
+	//TODO IMPROVEMENT use one filter for each validations and chain between (better to add and remove validations :
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
-		boolean correctAcces=true;
-		System.out.println("REQUEST FILTER");
-		
-		this.validateResource(exchange); 
-		
-		//Resource unknown
-		
-		
-		//contentTypeValidation(exchange);
-		
-		URI requestURI = exchange.getRequestURI();
-		FlowConfiguration fc = FlowConfiguration.getInstance();
+		boolean ok = false;
 
-		BusinessAction actionBean = fc.getBusinessActionFromURI(requestURI);
 		
-		//Validate user authentication
-		if (actionBean.isAuthenticated()) {
+		if (this.validateResource(exchange)) {
+			// if(contentTypeValidation(exchange));
+
+			URI requestURI = exchange.getRequestURI();
+			FlowConfiguration fc = FlowConfiguration.getInstance();
+			BusinessAction actionBean = fc.getBusinessActionFromURI(requestURI);
+			if (this.validateHTTPMethod(exchange, actionBean)) {
+				if(this.validateUserAuthentication(actionBean,exchange)){
+					ok=this.validateUserAuthorization(actionBean,exchange);
+				}
+			}
+		}
+		if(ok){
+			chain.doFilter(exchange);
+		}
+
+		// Validate user authentication
+		/*if (actionBean.isAuthenticated()) {
 			System.out.println("valida sesion");
-			if(!cookieSessionValidation(exchange)){
-				
-				
-				//HelperController.sendStaticView(exchange,"/loginNOK.html"); //este estaba
-				//HelperController.sendStaticView(exchange,"/login");  //este no deberia ir
-				
-				LoginPageBean viewBean=new LoginPageBean();
-				viewBean.setMessage("RESTRICTED ACCES TO "+requestURI.getPath()+". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
+			if (!cookieSessionValidation(exchange)) {
+
+				// HelperController.sendStaticView(exchange,"/loginNOK.html");
+				// //este estaba
+				// HelperController.sendStaticView(exchange,"/login"); //este no
+				// deberia ir
+
+				LoginPageBean viewBean = new LoginPageBean();
+				viewBean.setMessage("RESTRICTED ACCES TO " + requestURI.getPath()
+						+ ". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
 				viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI));
 				try {
 					HelperController.sendDynamicView(exchange, "com.schibsted.test.webapp.view.LoginView", viewBean);
@@ -61,28 +69,30 @@ public class HTTPRequestFilter extends Filter {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-			
-				correctAcces=false;
-			}else{
-			
-				//VALIDATE USER AUTHORIZATION
-				//if(FlowConfiguration.getInstance().isAuthorizatedURI(requestURI))
-				if(actionBean.getAccesRole()!=null && !actionBean.getAccesRole().isEmpty()){
-					//Getting user from sessionId
-					String sessionId=HelperController.getSessionIdFromCookie(exchange);
-					Integer userId=UserSessionManager.getUserIdBySessionId(sessionId, UserSessionStorage.getInstance());
-					UserDAO<User> dao=new UserDAO<User>();
+
+				correctAcces = false;
+			} else {
+
+				// VALIDATE USER AUTHORIZATION
+				// if(FlowConfiguration.getInstance().isAuthorizatedURI(requestURI))
+				if (actionBean.getAccesRole() != null && !actionBean.getAccesRole().isEmpty()) {
+					// Getting user from sessionId
+					String sessionId = HelperController.getSessionIdFromCookie(exchange);
+					Integer userId = UserSessionManager.getUserIdBySessionId(sessionId,
+							UserSessionStorage.getInstance());
+					UserDAO<User> dao = new UserDAO<User>();
 					try {
 						User user = dao.getById(userId);
-						List<Rol> userRoles=user.getRols();
-						String a=userRoles.get(0).toString();
-						
-						Optional<Rol> optionalRol=userRoles.stream().filter(rol -> rol.toString().equals( actionBean.getAccesRole().toUpperCase())).findFirst();
-						if(!optionalRol.isPresent()){
+						List<Rol> userRoles = user.getRols();
+						String a = userRoles.get(0).toString();
+
+						Optional<Rol> optionalRol = userRoles.stream()
+								.filter(rol -> rol.toString().equals(actionBean.getAccesRole().toUpperCase()))
+								.findFirst();
+						if (!optionalRol.isPresent()) {
 							System.out.println("USUARI NO AUTORIZAT!");
-							HelperController.sendError(exchange, 405, "pues eso que no puedes acceder");
-							correctAcces=false;
+							HelperController.sendError(exchange, 403, "FORBIDEN");
+							correctAcces = false;
 						}
 					} catch (DAOException e) {
 						// TODO Auto-generated catch block
@@ -91,22 +101,22 @@ public class HTTPRequestFilter extends Filter {
 				}
 			}
 		}
-		if(correctAcces){
+		if (correctAcces) {
 			chain.doFilter(exchange);
-		}
+		}*/
 	}
 
-	//TODO: NOT WORKS
-	private boolean contentTypeValidation(HttpExchange exchange){
+	// TODO: NOT WORKS
+	private boolean contentTypeValidation(HttpExchange exchange) {
 		return exchange.getRequestHeaders().getFirst("Content-Type").trim().equals("text/html");
 	}
-	
+
 	private boolean cookieSessionValidation(HttpExchange exchange) {
 		boolean userLogged = false;
 		String cookieStr = exchange.getRequestHeaders().getFirst("Cookie");
 		if (cookieStr != null && cookieStr.contains("SchibstedWebappSessionId=")) {
 			// TODO Revisar (la cookie pot portar mes parameters)
-			String schibstedWebappSessionId = cookieStr.replaceFirst(HelperController.COOKIE_NAME+"=", "");
+			String schibstedWebappSessionId = cookieStr.replaceFirst(HelperController.COOKIE_NAME + "=", "");
 			System.out.println(
 					"Tengo la cookie: " + cookieStr + ", schibstedWebappSessionId=" + schibstedWebappSessionId);
 
@@ -115,15 +125,87 @@ public class HTTPRequestFilter extends Filter {
 		}
 		return userLogged;
 	}
-	
-	private void validateResource(HttpExchange exchange) throws IOException{
+
+	private boolean validateResource(HttpExchange exchange) throws IOException {
+		boolean ok = true;
 		URI requestURI = exchange.getRequestURI();
-		if(FlowConfiguration.getInstance().getActionNameFromURI(requestURI)==null){
+		if (FlowConfiguration.getInstance().getActionNameFromURI(requestURI) == null) {
 			HelperController.sendError(exchange, 404, "404: PAGE NOT FOUND");
+			ok = false;
 		}
-		
-		
+		return ok;
 	}
-	
-	
+
+	private boolean validateHTTPMethod(HttpExchange exchange, BusinessAction actionBean) throws IOException {
+		String rqMethod = exchange.getRequestMethod();
+		boolean ok = true;
+
+		// 1. Validate standard value
+		if (rqMethod == null || (!rqMethod.equals("GET") && !rqMethod.equals("POST") && !rqMethod.equals("PUT")
+				&& !rqMethod.equals("DELETE") && !rqMethod.equals("PUT") && !rqMethod.equals("OPTIONS")
+				&& !rqMethod.equals("HEAD") && !rqMethod.equals("TRACE") && !rqMethod.equals("CONNECT"))) {
+			HelperController.sendError(exchange, 406, "NOT ACCEPTABLE");
+			ok = false;
+		} else {
+			if (!rqMethod.equals(actionBean.getHttpMethod().toString())) {
+				HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
+				ok = false;
+			}
+		}
+		return ok;
+	}
+
+	private boolean validateUserAuthentication(BusinessAction actionBean,HttpExchange exchange) throws IOException{
+		boolean ok=true;
+
+		if (actionBean.isAuthenticated()) {
+			System.out.println("valida sesion");
+			if(!cookieSessionValidation(exchange)){
+				//REDIRECT TO LOGIN PAGE
+
+				ok=false;
+				URI requestURI = exchange.getRequestURI();
+				//HelperController.sendStaticView(exchange,"/loginNOK.html"); //este estaba
+				//HelperController.sendStaticView(exchange,"/login");  //este no deberia ir
+				try {
+					LoginPageBean viewBean=new LoginPageBean();
+					viewBean.setMessage("RESTRICTED ACCES TO "+requestURI.getPath()+". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
+					viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI));
+					HelperController.sendDynamicView(exchange, "com.schibsted.test.webapp.view.LoginView", viewBean);
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+					//add log!
+					HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+				} 
+			}
+		}
+		return ok;
+	}
+
+	private boolean validateUserAuthorization(BusinessAction actionBean, HttpExchange exchange) throws IOException {
+		boolean ok=true;
+		if (actionBean.getAccesRole() != null && !actionBean.getAccesRole().isEmpty()) {
+			// Getting user from sessionId
+			String sessionId = HelperController.getSessionIdFromCookie(exchange);
+			Integer userId = UserSessionManager.getUserIdBySessionId(sessionId,UserSessionStorage.getInstance());
+			UserDAO<User> dao = new UserDAO<User>();
+			try {
+				User user = dao.getById(userId);
+				List<Rol> userRoles = user.getRols();
+				String a = userRoles.get(0).toString();
+
+				Optional<Rol> optionalRol = userRoles.stream()
+						.filter(rol -> rol.toString().equals(actionBean.getAccesRole().toUpperCase()))
+						.findFirst();
+				if (!optionalRol.isPresent()) {
+					System.out.println("USUARI NO AUTORIZAT!");
+					HelperController.sendError(exchange, 403, "FORBIDEN");
+					ok = false;
+				}
+			} catch (DAOException e) {
+				//add log!
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+			}
+		}
+		return ok;
+	}
 }

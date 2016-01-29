@@ -44,7 +44,7 @@ public class Controller implements HttpHandler {
 				parameters = HelperController.getGETParameters(exchange);
 				break;
 			default: 
-				HelperController.sendError(exchange,HttpURLConnection.HTTP_BAD_METHOD,"Method Not Allowed.");
+				HelperController.sendError(exchange,405,"METHOD NOT ALLOWED.");
 			}
 
 			// Map<String, List<String>> parametersNOVA =
