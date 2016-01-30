@@ -21,7 +21,7 @@ public class LoginView implements IViewLayer{
 				if(loginBean.getLogedUsername()!=null && !loginBean.getLogedUsername().isEmpty()){
 					message="USERNAME : "+loginBean.getLogedUsername();
 				}else{
-					message="NOT USER LOGGED";
+					message="USER NOT LOGGED";
 				}
 			}
 			

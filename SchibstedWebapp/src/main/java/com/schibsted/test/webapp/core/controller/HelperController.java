@@ -263,7 +263,7 @@ class HelperController {
 	 */
 	static void setCookie(HttpExchange exchange, String sessionId) {
 		// Creates session cookie with one day expiration
-		Long timestamp=new Date().getTime() + (ONE_HOUR_IN_MILLIS*ONE_HOUR_IN_MILLIS);
+		Long timestamp=new Date().getTime() + (ONE_HOUR_IN_MILLIS*USER_COOKIE_ALIVE_HOURS);
 		Date cookieExpires=new Date(timestamp);
 		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId+"; HttpOnly; expires="+formatDateForCookie(cookieExpires));
 	}
@@ -272,8 +272,9 @@ class HelperController {
 	 * Expires the webapp cookie in ResponseHeaders
 	 */
 	static void expireCookie(HttpExchange exchange, String sessionId) {
-		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
-		System.out.println("Set-Cookie,"+ COOKIE_NAME + "=" + sessionId+"; HttpOnly");
+		//exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
+		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; expires="+formatDateForCookie(new Date()));
+		System.out.println(COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
 	}
 
 

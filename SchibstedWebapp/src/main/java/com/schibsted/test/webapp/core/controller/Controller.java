@@ -83,15 +83,15 @@ public class Controller implements HttpHandler {
 						if((  (LoginSessionBean) viewBean ).getSessionId() != null && ((LoginSessionBean) viewBean).getForwardName() .equals(ValidateUserAction.FORWARD_SUCCESS)) {
 							HelperController.setCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
 						}else{
-							if (HelperController.getSessionIdFromCookie(exchange)!=null){
-								HelperController.expireCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+							if (HelperController.getSessionIdFromCookie(exchange)!=null && sessionId!=null && sessionId.isEmpty()){
+								HelperController.expireCookie(exchange, sessionId);
 							}
 						}
 					}
 					
 					// INTERCEPT LOGOUT ACTIONS FOR COOKIE MANAGEMENT
 					if (actionBean.getBusinessActionClass().equals("com.schibsted.test.webapp.businessAction.CloseUserAction")){
-						HelperController.expireCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+						HelperController.expireCookie(exchange, sessionId);
 					}
 
 					if(forward.getType()!=null){

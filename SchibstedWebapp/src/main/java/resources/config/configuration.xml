@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tns:flowConfig
+	xmlns:tns="http://webapp.test.schibsted.com/controller/flowconfig/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://webapp.test.schibsted.com/controller/flowconfig/beans configuration.xsd ">
+
+	<tns:businessAction authenticated="true" path="/page1" httpMethod="GET"
+		businessActionClass="com.schibsted.test.webapp.businessAction.UserInfoAction" accesRole="page1">
+		<tns:forward name="success" path="com.schibsted.test.webapp.view.Page1" type="dynamic" />
+	</tns:businessAction>
+
+	<tns:businessAction authenticated="true" path="/page2" httpMethod="GET"
+		businessActionClass="com.schibsted.test.webapp.businessAction.UserInfoAction" accesRole="page2">
+		<tns:forward name="success" path="com.schibsted.test.webapp.view.Page2" type="dynamic" />
+	</tns:businessAction>
+
+	<tns:businessAction authenticated="true" path="/page3" httpMethod="GET"
+		businessActionClass="com.schibsted.test.webapp.businessAction.UserInfoAction" accesRole="page3">
+		<tns:forward name="success" path="com.schibsted.test.webapp.view.Page3" type="dynamic" />
+	</tns:businessAction>
+
+	<tns:businessAction authenticated="false" path="/login" httpMethod="GET"
+		businessActionClass="com.schibsted.test.webapp.businessAction.LoginAction">
+		<!-- <tns:forward name="success" path="/login.html" type="static" /> -->
+		<tns:forward name="success" path="com.schibsted.test.webapp.view.LoginView" type="dynamic" />
+	</tns:businessAction>
+	
+	<!-- TODO: redirect path must be specified with /  static without !!-->
+	<!-- ALWAYS REDIRECT AFTER A POST! -->
+	<tns:businessAction authenticated="false" path="/validateUser" httpMethod="POST"
+		businessActionClass="com.schibsted.test.webapp.businessAction.ValidateUserAction">
+		<tns:forward name="success" path="/login" type="redirect" />    <!-- ALWAYS REDIRECT AFTER A POST! -->
+		<tns:forward name="loginError" path="/login" type="redirect" />
+	</tns:businessAction>
+	
+	<tns:businessAction authenticated="true" path="/closeUserSession" httpMethod="GET"
+		businessActionClass="com.schibsted.test.webapp.businessAction.CloseUserAction">
+		<tns:forward name="success" path="/login" type="redirect" /> 
+		<!-- <tns:forward name="loginError" path="login" type="redirect" /> -->
+	</tns:businessAction>
+
+</tns:flowConfig>
