@@ -162,7 +162,7 @@ public class FlowConfiguration {
 	
 	private Optional<BusinessAction> getOptionalBusinessActionFromURI(URI requestURI) {
 		//String path=HelperController.getPathFromURI(requestURI).trim().toLowerCase();
-		String path=HelperController.getPathFromURI(requestURI);
+		String path=HelperController.getPathFromURI(requestURI,AppController.applicationContext);
 		List<BusinessAction> actions=flowConfiguration.getBusinessAction();
 		Optional<BusinessAction> optionalAction=actions.stream().filter(action -> action.getPath().trim().toLowerCase().equals(path)).findFirst();
 		return optionalAction;

@@ -16,7 +16,10 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 @SuppressWarnings("restriction")
-public class Controller implements HttpHandler {
+public class AppController implements HttpHandler {
+	
+	//public static final String applicationContext = "/webapp/";
+	public static final String applicationContext = "/webapp";
 
 	// private final static String[] contentTypePost = {
 	// "application/x-www-form-urlencoded", "multipart/form-data",

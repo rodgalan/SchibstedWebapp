@@ -170,7 +170,7 @@ public class HTTPRequestFilter extends Filter {
 				try {
 					LoginPageBean viewBean=new LoginPageBean();
 					viewBean.setMessage("RESTRICTED ACCES TO "+requestURI.getPath()+". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
-					viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI));
+					viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI, AppController.applicationContext));
 					HelperController.sendDynamicView(exchange, "com.schibsted.test.webapp.view.LoginView", viewBean);
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 					//add log!

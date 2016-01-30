@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.schibsted.test.webapp.core.controller.Controller;
+import com.schibsted.test.services.user.UserServiceRequestFilter;
+import com.schibsted.test.services.user.UserServiceHttpHandler;
+import com.schibsted.test.webapp.core.controller.AppController;
 import com.schibsted.test.webapp.core.controller.FlowConfiguration;
 import com.schibsted.test.webapp.core.controller.HTTPRequestFilter;
 import com.schibsted.test.webapp.core.exceptions.CoreException;
@@ -27,17 +29,16 @@ import com.sun.net.httpserver.HttpServer;
 public class WebApp {
 
 	private static final Logger log = Logger.getLogger(WebApp.class.getName());
+	
 	// Aixo ens ho podem endur a un fitxer de configuracio del server
 	private static int port = 8080;
-	public static String applicationContext = "/webapp/"; // sin finalment va a
-															// config, haurà de
-															// deixarar de ser
-															// public!
+	/*public static String applicationContext = "/webapp/";
+	public static String userServiceContext = "/service/users";*/
 
-	private HttpServer server = null;
-
-	// Default users
-	//TODO gets better in config file
+	/*
+	 * DEFAULT USERS
+	 * TODO IMPORVE TO CONFIG FILE
+	 */
 	private static final String defaultAdminUserName = "admin";
 	private static final String defaultAdminUserPassword = "admin";
 	private static final Rol[] defaultAdminRols = { Rol.ADMIN };
@@ -60,28 +61,34 @@ public class WebApp {
 	
 	private static final User[] defaultUsers={defaultAdminUser, user1, user2, user3};
 
+	
+	
+	
 	// INITS SERVER
 	public static void main(String[] args) throws IOException, CoreException {
 
 		// A controlar esto :) Exception in thread "main"
 		// java.net.BindException: Address already in use: bind ()haremos puerto
 		// +1
+		
 		log.log(Level.INFO, "Starting Server on port ...");
-
-		// TODO: Revisar que fem amb IOException
 		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-		// Create server context & assign the Controller (requests handler,
-		// planetar si lo separamos)
-		HttpContext httpContext = server.createContext(applicationContext, new Controller());
 
+		//CREATE SERVER CONTEXT & ASSIGN HANDLER:  FOR WEBAPP AND USER SERVICE
+		HttpContext httpContext = server.createContext(AppController.applicationContext, new AppController());
+		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext, new UserServiceHttpHandler());
+
+		//ASSIGN REUQEST FILTER FOR EACH HANDLER:  FOR WEBAPP AND USER SERVICE
+		httpServiceContext.getFilters().add(new UserServiceRequestFilter());
 		httpContext.getFilters().add(new HTTPRequestFilter());
 
+		//LOAD FLOW CONFIG, USER STORAGE AND SESSION
 		FlowConfiguration.loadConfiguration();
-		// No physical storage for this PoC. ONLY FOR ACADEMICAL PURPOSE!
-		UserDataStorage.loadUserDataStorage();
+		UserDataStorage.loadUserDataStorage();   // No physical storage for this PoC. ONLY FOR ACADEMICAL PURPOSE!
 		UserSessionStorage.loadSessionStorage();
 
+		//INITS DEFAULT USERS
 		UserDAO<User> dao=new UserDAO<User>();
 		for(int i=0; i<defaultUsers.length; i++){
 			//UserDataStorage.getInstance().setUser(defaultUsers[i]);
@@ -89,13 +96,10 @@ public class WebApp {
 		}
 
 
+		//START SERVER
 		server.start();
 
-		/*
-		 * User admin=UserDataStorage.getInstance().getUser("admin");
-		 * System.out.println("Username: "+admin.getUsername());
-		 * System.out.println("Rol: "+admin.getRols());
-		 */
+		
 		log.log(Level.INFO, "Server Started successfully");
 
 	}

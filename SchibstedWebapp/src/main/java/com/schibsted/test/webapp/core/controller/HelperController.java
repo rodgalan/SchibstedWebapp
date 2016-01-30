@@ -27,7 +27,7 @@ import com.sun.net.httpserver.HttpExchange;
  */
 
 @SuppressWarnings("restriction")
-class HelperController {
+public class HelperController {
 	
 	static final String COOKIE_NAME = "SchibstedWebappSessionId";
 	static final String HTTP_POST = "POST";
@@ -43,7 +43,7 @@ class HelperController {
 	private final static String BASE_STATIC_VIEW_PATH="/resources/staticViews";
 	
 	
-	static void redirectPage(HttpExchange exchange, String newLocation, ViewBean bean) throws IOException { 
+	public static void redirectPage(HttpExchange exchange, String newLocation, ViewBean bean) throws IOException { 
 		setResponseHeaders(exchange);
 		if(bean!=null && bean.getMessage()!=null && !bean.getMessage().isEmpty()){
 			newLocation=newLocation.concat("?").concat("message=").concat(bean.getMessage());
@@ -56,7 +56,7 @@ class HelperController {
 	
 	
 	//TODO GETS BETTER: It must be in POST Filter (or may be with an interceptor)
-	static void setResponseHeaders(HttpExchange exchange){
+	public static void setResponseHeaders(HttpExchange exchange){
 		//No cache headers
 		exchange.getResponseHeaders().add("Cache-Control", "no-cache, no-store, must-revalidate");
 		exchange.getResponseHeaders().add("Pragma", "no-cache");
@@ -79,7 +79,7 @@ class HelperController {
 	 * @param httpStatusDescription
 	 * @throws IOException
 	 */
-	static void sendError(HttpExchange exchange, int httpStatusError , String httpStatusDescription) throws IOException {
+	public static void sendError(HttpExchange exchange, int httpStatusError , String httpStatusDescription) throws IOException {
 		setResponseHeaders(exchange);
 		exchange.sendResponseHeaders(httpStatusError, httpStatusDescription.length());
 		OutputStream os = exchange.getResponseBody();
@@ -92,7 +92,7 @@ class HelperController {
 	
 	
 
-	static void sendDynamicView(HttpExchange exchange, String pathViewClass, ViewBean viewBean)
+	public static void sendDynamicView(HttpExchange exchange, String pathViewClass, ViewBean viewBean)
 			throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class<?> viewClassImpl = Class.forName(pathViewClass);
 		IViewLayer view = (IViewLayer) viewClassImpl.newInstance();
@@ -110,7 +110,7 @@ class HelperController {
 	}
 
 	// TODO Metode copiat decontroller, esta duplicat!
-	static void sendStaticView(HttpExchange exchange, String pathPage) throws IOException {
+	public static void sendStaticView(HttpExchange exchange, String pathPage) throws IOException {
 		String filePath = BASE_STATIC_VIEW_PATH.concat(pathPage);
 		OutputStream os = exchange.getResponseBody();
 		
@@ -153,10 +153,16 @@ class HelperController {
 		}*/
 	}
 
-	static Map<String, List<String>> getGETParameters(HttpExchange exchange) throws IOException {
+	public static Map<String, List<String>> getGETParameters(HttpExchange exchange) throws IOException {
 		URI requestedUri = exchange.getRequestURI();
+		
+		/*
+		 * 
+	
+Thanks for this answer! It fails for params whose value includes an ampersand, though. To fix, use getRawQuery() instead of getQuery(), then param = java.net.URLDecoder.decode(param, "UTF-8") after splitting on "&".
+		 */
 		//String query = requestedUri.getRawQuery();
-		 String query = requestedUri.getQuery();
+		String query = requestedUri.getQuery(); 
 		
 		Map<String, List<String>> parameters = new HashMap<String, List<String>>();
 		if (query != null) {
@@ -187,7 +193,7 @@ class HelperController {
 
 	
 
-	static Map<String, List<String>> parseQuery(String query, String encoding) throws UnsupportedEncodingException {
+	public static Map<String, List<String>> parseQuery(String query, String encoding) throws UnsupportedEncodingException {
 		Map<String, List<String>> parameters = new HashMap<String, List<String>>();
 		String defs[] = query.split("[&]");
 		for (String def : defs) {
@@ -212,7 +218,7 @@ class HelperController {
 
 	}
 
-	static Map<String, List<String>> getPOSTParameters(HttpExchange exchange) throws IOException {
+	public static Map<String, List<String>> getPOSTParameters(HttpExchange exchange) throws IOException {
 		Map<String, List<String>> parms = new HashMap<String, List<String>>();
 
 		// TODO Mal esto habria que leerlo o poner utf o algo (content type
@@ -261,7 +267,7 @@ class HelperController {
 	/*
 	 * Sets new webapp cookie in ResponseHeaders
 	 */
-	static void setCookie(HttpExchange exchange, String sessionId) {
+	public static void setCookie(HttpExchange exchange, String sessionId) {
 		// Creates session cookie with one day expiration
 		Long timestamp=new Date().getTime() + (ONE_HOUR_IN_MILLIS*USER_COOKIE_ALIVE_HOURS);
 		Date cookieExpires=new Date(timestamp);
@@ -271,7 +277,7 @@ class HelperController {
 	/*
 	 * Expires the webapp cookie in ResponseHeaders
 	 */
-	static void expireCookie(HttpExchange exchange, String sessionId) {
+	public static void expireCookie(HttpExchange exchange, String sessionId) {
 		//exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
 		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; expires="+formatDateForCookie(new Date()));
 		System.out.println(COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
@@ -285,7 +291,7 @@ class HelperController {
 	     return formated;
 	}
 	
-	static String getSessionIdFromCookie(HttpExchange exchange) {
+	public static String getSessionIdFromCookie(HttpExchange exchange) {
 		String schibstedWebappSessionId = null;
 		String cookieStr = exchange.getRequestHeaders().getFirst("Cookie");
 		if (cookieStr != null && cookieStr.contains(HelperController.COOKIE_NAME + "=")) {
@@ -295,10 +301,18 @@ class HelperController {
 
 	}
 	
-	static String getPathFromURI(URI uri) {
+	
+	/**
+	 * Get relative application context from uri
+	 * @param uri
+	 * @param applicationContext
+	 * @return
+	 */
+	public static String getPathFromURI(URI uri, String applicationContext) {
 		String relativePath = null;
 		if (uri != null && uri.getPath() != null) {
-			relativePath = uri.getPath().substring(WebApp.applicationContext.length() - 1).trim().toLowerCase();
+			//relativePath = uri.getPath().substring(applicationContext.length() - 1).trim().toLowerCase();
+			relativePath = uri.getPath().substring(applicationContext.length() ).trim().toLowerCase();
 		}
 		return relativePath;
 	}
