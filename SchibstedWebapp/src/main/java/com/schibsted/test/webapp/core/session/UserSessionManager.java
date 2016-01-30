@@ -8,7 +8,7 @@ import com.schibsted.test.webapp.core.security.SecurityHelper;
 
 public class UserSessionManager {
 	private static final long ONE_MINUTE_IN_MILLIS=60000; 
-	private static final long USER_SESSION_ALIVE_MINUTES=1; 
+	private static final long USER_SESSION_ALIVE_MINUTES=5; 
 	
 	public static Integer getUserIdBySessionId(String sessionId, UserSessionStorage sessionStorage){
 		return sessionStorage.getActiveSessions().get(sessionId).getUserId();

@@ -16,13 +16,8 @@ import com.schibsted.test.webapp.model.User;
 
 public class ValidateUserAction implements IBusinessActionLayer{
 	
-	private static final String FORWARD_SUCCESS="success";
-	private static final String FORWARD_NOT_LOGGED="loginError";
-	
-	private static final String MESSAGE_SUCCESS="HELLO #username#, you are successfuly loged :)";
-	private static final String MESSAGE_NOT_LOGGED="Your username/password are not correct";
-	
-	private static final String USERNAME_TAG="#username#";
+	public static final String FORWARD_SUCCESS="success";
+	public static final String FORWARD_NOT_LOGGED="loginError";
 	
 	
 	@Override
@@ -37,7 +32,7 @@ public class ValidateUserAction implements IBusinessActionLayer{
 		List<String> redirectTo=requestParameters.get("goesto");
 		
 		//1. Getting parameters
-		if(usernameList!=null && usernameList.size()==1 & passwordList!=null && passwordList.size()==1 && usernameList.get(0)!=null && passwordList.get(0)!=null){
+		if(usernameList!=null && usernameList.size()==1 && passwordList!=null && passwordList.size()==1 && usernameList.get(0)!=null && !usernameList.get(0).isEmpty() && passwordList.get(0)!=null && !passwordList.get(0).isEmpty()){
 			String username=usernameList.get(0);
 			String password=passwordList.get(0);
 			
@@ -56,19 +51,14 @@ public class ValidateUserAction implements IBusinessActionLayer{
 					sessionBean = new LoginSessionBean(session);
 					sessionBean.setForwardName(FORWARD_SUCCESS);
 					
-					if(redirectTo!=null && redirectTo.size()==1){
+					if(redirectTo!=null && redirectTo.size()==1 && redirectTo.get(0)!=null && !redirectTo.get(0).isEmpty()){
 						sessionBean.setRedirectLocation(redirectTo.get(0));
 					}
-					//sessionBean.setMessage(MESSAGE_SUCCESS.replaceAll(USERNAME_TAG, username));
 				}
 			} catch (DAOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		
-		if(sessionBean.getForwardName().equals(FORWARD_NOT_LOGGED)){
-			sessionBean.setMessage(MESSAGE_NOT_LOGGED);
 		}
 		
 		return sessionBean;

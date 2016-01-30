@@ -1,23 +1,22 @@
 package com.schibsted.test.webapp.core.controller;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+import java.util.TimeZone;
 
 import com.schibsted.test.webapp.WebApp;
-import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
-import com.schibsted.test.webapp.controller.flowconfig.beans.Forward;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -33,6 +32,10 @@ class HelperController {
 	static final String COOKIE_NAME = "SchibstedWebappSessionId";
 	static final String HTTP_POST = "POST";
 	static final String HTTP_GET = "GET";
+	
+	static final String COOKIE_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+	private static final long ONE_HOUR_IN_MILLIS=3600000; 
+	private static final long USER_COOKIE_ALIVE_HOURS=24; 
 	
 	//Base file path om wich static pages are allocated. 
 	//TODO GETS BETTER in config file!!
@@ -182,49 +185,7 @@ class HelperController {
 		return parameters;
 	}
 
-	static Map<String, List<String>> getPOSTParametersNOVA(HttpExchange exchange) throws IOException {
-
-		// TODO Mal esto habria que leerlo o poner utf o algo (content type
-		// puede // contener charset creo
-		String encoding = "UTF-8";
-
-		// read the query string from the request body
-		String query = null;
-		InputStream in = exchange.getRequestBody();
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte buf[] = new byte[4096];
-			for (int n = in.read(buf); n > 0; n = in.read(buf)) {
-				out.write(buf, 0, n);
-			}
-			query = new String(out.toByteArray(), encoding);
-		} finally {
-			in.close();
-		}
-
-		// return parseQuery(query,encoding);
-		Map<String, List<String>> parameters = new HashMap<String, List<String>>();
-		String defs[] = query.split("[&]");
-		for (String def : defs) {
-			int ix = def.indexOf('=');
-			String name;
-			String value;
-			if (ix < 0) {
-				name = URLDecoder.decode(def, encoding);
-				value = "";
-			} else {
-				name = URLDecoder.decode(def.substring(0, ix), encoding);
-				value = URLDecoder.decode(def.substring(ix + 1), encoding);
-			}
-			List<String> list = parameters.get(name);
-			if (list == null) {
-				list = new ArrayList<String>();
-				parameters.put(name, list);
-			}
-			list.add(value);
-		}
-		return parameters;
-	}
+	
 
 	static Map<String, List<String>> parseQuery(String query, String encoding) throws UnsupportedEncodingException {
 		Map<String, List<String>> parameters = new HashMap<String, List<String>>();
@@ -301,12 +262,27 @@ class HelperController {
 	 * Sets new webapp cookie in ResponseHeaders
 	 */
 	static void setCookie(HttpExchange exchange, String sessionId) {
-		// Creates session cookie without expiration: alive usser session is
-		// managed in server side (better security)
-		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId);
+		// Creates session cookie with one day expiration
+		Long timestamp=new Date().getTime() + (ONE_HOUR_IN_MILLIS*ONE_HOUR_IN_MILLIS);
+		Date cookieExpires=new Date(timestamp);
+		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId+"; HttpOnly; expires="+formatDateForCookie(cookieExpires));
+	}
+	
+	/*
+	 * Expires the webapp cookie in ResponseHeaders
+	 */
+	static void expireCookie(HttpExchange exchange, String sessionId) {
+		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
+		System.out.println("Set-Cookie,"+ COOKIE_NAME + "=" + sessionId+"; HttpOnly");
 	}
 
-	
+
+	private static String formatDateForCookie(Date date){
+		 SimpleDateFormat formatter = new SimpleDateFormat(COOKIE_DATE_FORMAT, Locale.US);
+	     formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+	     String formated=formatter.format(date);
+	     return formated;
+	}
 	
 	static String getSessionIdFromCookie(HttpExchange exchange) {
 		String schibstedWebappSessionId = null;
@@ -325,5 +301,5 @@ class HelperController {
 		}
 		return relativePath;
 	}
-
+	
 }

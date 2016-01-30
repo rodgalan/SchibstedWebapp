@@ -55,7 +55,7 @@ public class WebApp {
 
 	private static final String testUserRol3Name = "user3";
 	private static final String testUserRol3Password = "user3";
-	private static final Rol[] testUserRol3Rols = { Rol.PAGE2 };
+	private static final Rol[] testUserRol3Rols = { Rol.PAGE3 };
 	private static final User user3 = new User(testUserRol3Name, SecurityHelper.getPasswordHash(testUserRol3Password), Arrays.asList(testUserRol3Rols));
 	
 	private static final User[] defaultUsers={defaultAdminUser, user1, user2, user3};

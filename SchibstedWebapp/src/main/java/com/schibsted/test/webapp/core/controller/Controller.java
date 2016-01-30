@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.schibsted.test.webapp.businessAction.ValidateUserAction;
 import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
 import com.schibsted.test.webapp.controller.flowconfig.beans.Forward;
+import com.schibsted.test.webapp.core.session.UserSessionManager;
+import com.schibsted.test.webapp.core.session.UserSessionStorage;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -47,10 +50,6 @@ public class Controller implements HttpHandler {
 				HelperController.sendError(exchange,405,"METHOD NOT ALLOWED.");
 			}
 
-			// Map<String, List<String>> parametersNOVA =
-			// getPOSTParametersNOVA(exchange);
-			// Map<String, List<String>> parameters =
-			// getPOSTParameters(exchange);
 
 			URI requestURI = exchange.getRequestURI();
 			FlowConfiguration fc = FlowConfiguration.getInstance();
@@ -60,12 +59,18 @@ public class Controller implements HttpHandler {
 				Class<?> actionClassImpl = Class.forName(actionBean.getBusinessActionClass());
 				IBusinessActionLayer action = (IBusinessActionLayer) actionClassImpl.newInstance();
 
-				// PRE Filter has validated Session. If there are the cookie &&
-				// authenticated action then is a valid cookie.
+				
 				//TODO GETS BETTER TO IMPLEMENT AN HTTPSESSION TO STORAGGE ANY VALUE LINKED TO SESSIONID
 				String sessionId = null;
 				if (actionBean.isAuthenticated()) {
+					// PRE Filter has validated Session. If there are the cookie && authenticated action then is a valid cookie.
 					sessionId = HelperController.getSessionIdFromCookie(exchange);
+				}else{
+					//If action not needs authentication but session is correct, session timestamp needs refresh too. 
+					String candidateSessionId = HelperController.getSessionIdFromCookie(exchange);
+					if(UserSessionManager.validateSession(candidateSessionId, UserSessionStorage.getInstance())){
+						sessionId = HelperController.getSessionIdFromCookie(exchange);
+					}
 				}
 				ViewBean viewBean = action.doProcessing(parameters, sessionId);
 				Optional<Forward> optForward = actionBean.getForward().stream()
@@ -73,19 +78,25 @@ public class Controller implements HttpHandler {
 				if (optForward.isPresent()) {
 					Forward forward = optForward.get();
 
-					// Intercept login Actions or use a Filer?
-					if (actionBean.getBusinessActionClass()
-							.equals("com.schibsted.test.webapp.businessAction.ValidateUserAction")
-							&& viewBean instanceof LoginSessionBean && viewBean != null
-							&& ((LoginSessionBean) viewBean).getSessionId() != null) {
-
-						HelperController.setCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+					// INTERCEPT LOGIN ACTIONS FOR COOKIE MANAGEMENT
+					if (actionBean.getBusinessActionClass().equals("com.schibsted.test.webapp.businessAction.ValidateUserAction") && viewBean instanceof LoginSessionBean && viewBean != null){
+						if((  (LoginSessionBean) viewBean ).getSessionId() != null && ((LoginSessionBean) viewBean).getForwardName() .equals(ValidateUserAction.FORWARD_SUCCESS)) {
+							HelperController.setCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+						}else{
+							if (HelperController.getSessionIdFromCookie(exchange)!=null){
+								HelperController.expireCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+							}
+						}
 					}
 					
+					// INTERCEPT LOGOUT ACTIONS FOR COOKIE MANAGEMENT
+					if (actionBean.getBusinessActionClass().equals("com.schibsted.test.webapp.businessAction.CloseUserAction")){
+						HelperController.expireCookie(exchange, ((LoginSessionBean) viewBean).getSessionId());
+					}
+
 					if(forward.getType()!=null){
 						switch (forward.getType()) {
 						case STATIC:
-							
 							HelperController.sendStaticView(exchange, forward.getPath());
 							break;
 						case DYNAMIC:
@@ -105,8 +116,9 @@ public class Controller implements HttpHandler {
 							HelperController.redirectPage(exchange, redirectPath, viewBean);
 							break;
 	
-						default: // @TODO Error de configuracio.
-									// ConfigErrorException
+						default: 
+							HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");// @TODO Error de configuracio.
+							//logs. Error de configuracio
 						}
 					}else{
 						//Forward not found (log)
