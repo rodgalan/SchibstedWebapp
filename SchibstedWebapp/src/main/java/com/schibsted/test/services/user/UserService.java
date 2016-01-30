@@ -16,6 +16,7 @@ import com.schibsted.test.services.core.Service.HttpMethods;
 import com.schibsted.test.services.user.bean.RolsInfo;
 import com.schibsted.test.services.user.bean.UserInfo;
 import com.schibsted.test.services.user.bean.UserServiceBean;
+import com.schibsted.test.webapp.core.controller.HelperController;
 import com.schibsted.test.webapp.core.exceptions.DAOException;
 import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.IRolTypes.Rol;
@@ -45,9 +46,11 @@ public class UserService {
 					UserInfo userInfo = mapUserModelToUserService(userModel);
 					//String json=getJsonObject(userService);
 					sendUserXML(userInfo, exchange); 
+				}else{
+					HelperController.sendError(exchange, 400, "BAD REQUEST. INVALID ENTITY");
 				}
 			} catch (DAOException e) {
-				//TODO ver que hacemos, error 500
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			}
 		}
 	}
@@ -64,8 +67,23 @@ public class UserService {
 	}
 	
 	@Service(method=HttpMethods.DELETE,relativeURI="/{userId}")
-	public void DeleteUser(HttpExchange exchange, String relativePath){
+	public void DeleteUser(HttpExchange exchange, String relativePath) throws IOException{
 		System.out.println("UserService.deleteUsers");
+		Integer userId=getUserId(relativePath);
+	
+		if(userId!=null){
+			UserDAO<User> dao = new UserDAO<User>();
+			try {
+				boolean ok = dao.remove(userId);
+				if(ok){
+					HelperController.sendError(exchange, 204, "NO CONTENT. USER HAVE BEEN DELETED");
+				}else{
+					HelperController.sendError(exchange, 400, "BAD REQUEST. INVALID ENTITY");
+				}
+			} catch (DAOException e) {
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+			}
+		}
 	}
 	
 	/* ***
