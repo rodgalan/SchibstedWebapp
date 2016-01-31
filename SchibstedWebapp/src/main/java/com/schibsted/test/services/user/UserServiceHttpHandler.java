@@ -87,7 +87,6 @@ public class UserServiceHttpHandler implements HttpHandler {
 			
 		} catch (Exception e) {
 			HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
-			System.out.println("ERROR! "+e.toString());
 		}
 		
 	}

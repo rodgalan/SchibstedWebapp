@@ -15,7 +15,6 @@ public class LoginView implements IViewLayer{
 		LoginPageBean loginBean=(LoginPageBean)viewBean;
 		String message="";
 		String goesto="";
-		String username="";
 		if(loginBean!=null){
 			if(loginBean!=null){
 				if(loginBean.getLogedUsername()!=null && !loginBean.getLogedUsername().isEmpty()){
@@ -25,9 +24,7 @@ public class LoginView implements IViewLayer{
 				}
 			}
 			
-			/*if(loginBean.getMessage()!=null && !loginBean.getMessage().isEmpty()){
-				message=loginBean.getMessage();
-			}*/
+
 			if(loginBean.getOriginalRequest()!=null && !loginBean.getOriginalRequest().isEmpty()){
 				goesto=loginBean.getOriginalRequest();
 			}

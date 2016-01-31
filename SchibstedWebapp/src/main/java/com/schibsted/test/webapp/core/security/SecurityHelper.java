@@ -5,6 +5,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+
+/**
+ * SUPPORT FOR HASHING AND ENCODING
+ * @author Anna
+ *
+ */
 public class SecurityHelper {
 	
 	
@@ -20,7 +26,6 @@ public class SecurityHelper {
 			MessageDigest sha = MessageDigest.getInstance("SHA-1");
 			byte[] result =  sha.digest(randomNum.getBytes());
 			sessionId=javax.xml.bind.DatatypeConverter.printHexBinary(result);
-		    System.out.println("Generating new session: "+sessionId);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

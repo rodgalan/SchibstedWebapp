@@ -21,7 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 /**
  * 
- * Only visible from it's package to be used by controller and filters
+ * Helper 
  * @author Anna
  *
  */
@@ -278,9 +278,7 @@ Thanks for this answer! It fails for params whose value includes an ampersand, t
 	 * Expires the webapp cookie in ResponseHeaders
 	 */
 	public static void expireCookie(HttpExchange exchange, String sessionId) {
-		//exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
 		exchange.getResponseHeaders().add("Set-Cookie", COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; expires="+formatDateForCookie(new Date()));
-		System.out.println(COOKIE_NAME + "=" + sessionId +"; HttpOnly; token=deleted; path=/; expires="+formatDateForCookie(new Date()));
 	}
 
 

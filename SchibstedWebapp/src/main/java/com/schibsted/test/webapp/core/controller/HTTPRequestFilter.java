@@ -35,6 +35,8 @@ public class HTTPRequestFilter extends Filter {
 		
 		HelperController.setResponseHeaders(exchange);
 		if (this.validateResource(exchange)) {
+			
+			//TODO
 			// if(contentTypeValidation(exchange));
 
 			URI requestURI = exchange.getRequestURI();
@@ -62,8 +64,6 @@ public class HTTPRequestFilter extends Filter {
 		if (cookieStr != null && cookieStr.contains("SchibstedWebappSessionId=")) {
 			// TODO Revisar (la cookie pot portar mes parameters)
 			String schibstedWebappSessionId = cookieStr.replaceFirst(HelperController.COOKIE_NAME + "=", "");
-			System.out.println(
-					"Tengo la cookie: " + cookieStr + ", schibstedWebappSessionId=" + schibstedWebappSessionId);
 
 			UserSessionStorage sessionStorage = UserSessionStorage.getInstance();
 			userLogged = UserSessionManager.validateSession(schibstedWebappSessionId, sessionStorage);
@@ -104,14 +104,11 @@ public class HTTPRequestFilter extends Filter {
 		boolean ok=true;
 
 		if (actionBean.isAuthenticated()) {
-			System.out.println("valida sesion");
 			if(!cookieSessionValidation(exchange)){
 				//REDIRECT TO LOGIN PAGE
 
 				ok=false;
 				URI requestURI = exchange.getRequestURI();
-				//HelperController.sendStaticView(exchange,"/loginNOK.html"); //este estaba
-				//HelperController.sendStaticView(exchange,"/login");  //este no deberia ir
 				try {
 					LoginPageBean viewBean=new LoginPageBean();
 					viewBean.setMessage("RESTRICTED ACCES TO "+requestURI.getPath()+". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
@@ -142,7 +139,6 @@ public class HTTPRequestFilter extends Filter {
 						.filter(rol -> rol.toString().equals(actionBean.getAccesRole().toUpperCase()))
 						.findFirst();
 				if (!optionalRol.isPresent()) {
-					System.out.println("USUARI NO AUTORIZAT!");
 					HelperController.sendError(exchange, 403, "FORBIDEN");
 					ok = false;
 				}

@@ -9,16 +9,20 @@ import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
+
 @SuppressWarnings("restriction")
 public class ServicesHelper {
 	
+	
+	/**
+	 * Gets a String with message from request
+	 * @param exchange
+	 * @return
+	 * @throws IOException
+	 */
 	public static String getMessageFromRequest(HttpExchange exchange) throws IOException {
-		Map<String, List<String>> parms = new HashMap<String, List<String>>();
 
-		// TODO Mal esto habria que leerlo o poner utf o algo (content type
-		// puede // contener charset creo
 		String encoding = "UTF-8";
-
 		// read the query string from the request body
 		String qry;
 		InputStream in = exchange.getRequestBody();
@@ -35,18 +39,18 @@ public class ServicesHelper {
 		return qry;
 	}
 	
+	
+	/**
+	 * STANDARD RESPONSE HEADERS FOR REST SERVICES.
+	 * Content type not informed (service can use XML or JSON)
+	 * @param exchange
+	 */
 	public static void setResponseHeaders(HttpExchange exchange){
 		//No cache headers
 		exchange.getResponseHeaders().add("Cache-Control", "no-cache, no-store, must-revalidate");
 		exchange.getResponseHeaders().add("Pragma", "no-cache");
 		exchange.getResponseHeaders().add("Expires", "0");
-		//Content type & accept only http
-		//exchange.getResponseHeaders().add("Content-Type", "text/html");
-		//exchange.getResponseHeaders().add("Accept", "text/html");
-		//UTF-8 encoding
 		exchange.getResponseHeaders().add("Accept-Charset", "utf-8");
-		
-	
 	}
 
 }

@@ -18,28 +18,12 @@ import com.sun.net.httpserver.HttpHandler;
 @SuppressWarnings("restriction")
 public class AppController implements HttpHandler {
 	
-	//public static final String applicationContext = "/webapp/";
 	public static final String applicationContext = "/webapp";
-
-	// private final static String[] contentTypePost = {
-	// "application/x-www-form-urlencoded", "multipart/form-data",
-	// "application/json" };
-
-	// Haure de juntar el tractament de cookies al algun lloc. ara esta entre el
-	// filtre i el controller
-//	public static final String COOKIE_NAME = "SchibstedWebappSessionId";
-//	public static final String HTTP_POST = "POST";
-//	public static final String HTTP_GET = "GET";
 	
-	
-
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		System.out.println("He capturado la petición porque molo un monton 2");
 		if (exchange != null && exchange.getRequestURI() != null) {
-			// TODO important: validar content-type. Hi ha un metode por ahi, el
-			// problema es que el meu html es cutre
-
+			
 			String requestMethod = exchange.getRequestMethod();
 			Map<String, List<String>> parameters = null;
 			switch (requestMethod) {
@@ -63,7 +47,7 @@ public class AppController implements HttpHandler {
 				IBusinessActionLayer action = (IBusinessActionLayer) actionClassImpl.newInstance();
 
 				
-				//TODO GETS BETTER TO IMPLEMENT AN HTTPSESSION TO STORAGGE ANY VALUE LINKED TO SESSIONID
+				//TODO IMPROVE TO IMPLEMENT AN HTTPSESSION TO STORAGGE ANY VALUE LINKED TO SESSIONID
 				String sessionId = null;
 				if (actionBean.isAuthenticated()) {
 					// PRE Filter has validated Session. If there are the cookie && authenticated action then is a valid cookie.
@@ -130,14 +114,11 @@ public class AppController implements HttpHandler {
 				}
 
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			}
 
 		}

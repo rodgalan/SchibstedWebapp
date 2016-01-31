@@ -17,7 +17,6 @@ public class UserInfoAction implements IBusinessActionLayer{
 
 	@Override
 	public ViewBean doProcessing(Map<String, List<String>> parameters, String sessionId) {
-		System.out.println("UserInfoAction.doProcessing");
 		UserInfoBean result=new UserInfoBean();
 		if(sessionId!=null){
 			Integer userId=UserSessionManager.getUserIdBySessionId(sessionId ,UserSessionStorage.getInstance());		
@@ -29,9 +28,7 @@ public class UserInfoAction implements IBusinessActionLayer{
 					result.setForwardName("success");
 				}
 			} catch (DAOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				//Esto casa, falta el forward global
+				//TODO: Global Error is needed to handle this errors!
 				result.setForwardName("error");
 			}
 		}

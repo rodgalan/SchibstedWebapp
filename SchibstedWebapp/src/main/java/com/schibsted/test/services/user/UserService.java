@@ -30,7 +30,13 @@ import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.IRolTypes.Rol;
 import com.schibsted.test.webapp.model.User;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.Headers;
+
+
+/**
+ * SERVICE USERS 
+ * @author Anna
+ *
+ */
 
 @SuppressWarnings("restriction")
 @RESTServiceClass(basePath = UserServiceHttpHandler.userServiceContext, serviceName = "User")
@@ -38,12 +44,6 @@ public class UserService {
 
 	@Service(method = HttpMethods.GET, relativeURI = "")
 	public void getUsers(HttpExchange exchange, String relativePath) throws IOException {
-		
-		
-		System.out.println("UserService.getUsers");
-		Headers he=exchange.getRequestHeaders();
-		System.out.println(he.values().toString());
-
 		UserDAO<User> dao = new UserDAO<User>();
 		List<User> users;
 		try {
@@ -64,7 +64,6 @@ public class UserService {
 
 	@Service(method = HttpMethods.GET, relativeURI = "/{userId}")
 	public void getUser(HttpExchange exchange, String relativePath) throws JAXBException, IOException {
-		System.out.println("UserService.getUser");
 		Integer userId = getUserId(relativePath);
 
 		if (userId != null) {
@@ -88,10 +87,8 @@ public class UserService {
 
 	@Service(method = HttpMethods.POST, relativeURI = "/{userId}")
 	public void modifyUser(HttpExchange exchange, String relativePath) throws IOException {
-		System.out.println("UserService.modifyUsers");
 		Integer userId = getUserId(relativePath);
 		String message = ServicesHelper.getMessageFromRequest(exchange);
-		System.out.println(message);
 		if (message != null && userId != null) {
 			try {
 				UserInfo userInfo = getUserInfoFromXML(message);
@@ -127,10 +124,7 @@ public class UserService {
 
 	@Service(method = HttpMethods.PUT, relativeURI = "")
 	public void addUsers(HttpExchange exchange, String relativePath) throws IOException {
-
-		System.out.println("UserService.addUsers");
 		String message = ServicesHelper.getMessageFromRequest(exchange);
-		System.out.println(message);
 		if (message != null && relativePath.equals("")) {
 			try {
 				UserInfo userInfo = getUserInfoFromXML(message);
@@ -171,7 +165,6 @@ public class UserService {
 
 	@Service(method = HttpMethods.DELETE, relativeURI = "/{userId}")
 	public void deleteUser(HttpExchange exchange, String relativePath) throws IOException {
-		System.out.println("UserService.deleteUsers");
 		Integer userId = getUserId(relativePath);
 
 		if (userId != null) {
@@ -211,7 +204,6 @@ public class UserService {
 		UserInfo userView = null;
 		if (userModel != null && userModel.getUserId() != null) {
 			userView = new UserInfo();
-			// userView.setUserId(userModel.getUserId());
 			userView.setUsername(userModel.getUsername());
 
 			RolsInfo rols = new RolsInfo();
@@ -239,21 +231,22 @@ public class UserService {
 		User userModel = null;
 		if (userView != null) {
 			userModel = new User();
-			// userModel.setUserId(userView.getUserId());
 			userModel.setUsername(userView.getUsername());
 			if (userView.getRolsInfo() != null && userView.getRolsInfo().getRol() != null
 					&& !userView.getRolsInfo().getRol().isEmpty()) {
 				List<Rol> modelRols = new ArrayList<Rol>();
+				
+				
+				//Not to add the same rol twice
+				boolean hasAdmin=false;boolean hasP1=false;boolean hasP2=false;boolean hasP3=false;
 				for (String rolView : userView.getRolsInfo().getRol()) {
 					// TODO: We must have only one enum of ROLE
 					userModel.setRols(modelRols);
-					
-					//Not to add the same rol twice
-					boolean hasAdmin=false;boolean hasP1=false;boolean hasP2=false;boolean hasP3=false;
+
 					switch (rolView) {
 					case "ADMIN":
 						if(hasAdmin){
-							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 						}else{
 							modelRols.add(Rol.ADMIN);
 							hasAdmin=true;
@@ -261,7 +254,7 @@ public class UserService {
 						break;
 					case "PAGE1":
 						if(hasP1){
-							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 						}else{
 							modelRols.add(Rol.PAGE1);
 							hasP1=true;
@@ -269,7 +262,7 @@ public class UserService {
 						break;
 					case "PAGE2":
 						if(hasP2){
-							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 						}else{
 							modelRols.add(Rol.PAGE2);
 							hasP2=true;
@@ -277,7 +270,7 @@ public class UserService {
 						break;
 					case "PAGE3":
 						if(hasP3){
-							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 						}else{
 							modelRols.add(Rol.PAGE3);
 							hasP3=true;
@@ -285,7 +278,7 @@ public class UserService {
 						break;
 					default:
 						throw new RolException(
-								"ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+								"ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 					}
 				}
 			}

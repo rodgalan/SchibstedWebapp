@@ -31,79 +31,82 @@ public class WebApp {
 
 	private static final Logger log = Logger.getLogger(WebApp.class.getName());
 	
-	// Aixo ens ho podem endur a un fitxer de configuracio del server
-	private static int port = 8080;
+	//DEFAULT PORT TODO TO CONFIG FILE
+	private static int defaultPort = 8080;
 
 	/*
-	 * DEFAULT USERS
-	 * TODO IMPROVE TO CONFIG FILE
+	 * DEFAULT USERS TODO IMPROVE TO CONFIG FILE
 	 */
 	private static final String defaultAdminUserName = "admin";
 	private static final String defaultAdminUserPassword = "admin";
 	private static final Rol[] defaultAdminRols = { Rol.ADMIN };
-	private static final User defaultAdminUser = new User(defaultAdminUserName, SecurityHelper.getPasswordHash(defaultAdminUserPassword),  Arrays.asList(defaultAdminRols));
+	private static final User defaultAdminUser = new User(defaultAdminUserName,
+			SecurityHelper.getPasswordHash(defaultAdminUserPassword), Arrays.asList(defaultAdminRols));
 
 	private static final String testUserRol1Name = "user1";
 	private static final String testUserRol1Password = "user1";
 	private static final Rol[] testUserRol1Rols = { Rol.PAGE1 };
-	private static final User user1 = new User(testUserRol1Name, SecurityHelper.getPasswordHash(testUserRol1Password), Arrays.asList(testUserRol1Rols));
+	private static final User user1 = new User(testUserRol1Name, SecurityHelper.getPasswordHash(testUserRol1Password),
+			Arrays.asList(testUserRol1Rols));
 
 	private static final String testUserRol2Name = "user2";
 	private static final String testUserRol2Password = "user2";
 	private static final Rol[] testUserRol2Rols = { Rol.PAGE2 };
-	private static final User user2 = new User(testUserRol2Name, SecurityHelper.getPasswordHash(testUserRol2Password), Arrays.asList(testUserRol2Rols));
+	private static final User user2 = new User(testUserRol2Name, SecurityHelper.getPasswordHash(testUserRol2Password),
+			Arrays.asList(testUserRol2Rols));
 
 	private static final String testUserRol3Name = "user3";
 	private static final String testUserRol3Password = "user3";
 	private static final Rol[] testUserRol3Rols = { Rol.PAGE3 };
-	private static final User user3 = new User(testUserRol3Name, SecurityHelper.getPasswordHash(testUserRol3Password), Arrays.asList(testUserRol3Rols));
-	
-	private static final User[] defaultUsers={defaultAdminUser, user1, user2, user3};
+	private static final User user3 = new User(testUserRol3Name, SecurityHelper.getPasswordHash(testUserRol3Password),
+			Arrays.asList(testUserRol3Rols));
 
-	
-	
-	
+	private static final User[] defaultUsers = { defaultAdminUser, user1, user2, user3 };
+
 	// INITS SERVER
 	public static void main(String[] args) throws IOException, CoreException {
+		int port = defaultPort;
 
-		// A controlar esto :) Exception in thread "main"
-		// java.net.BindException: Address already in use: bind ()haremos puerto
-		// +1
-		
-		log.log(Level.INFO, "Starting Server on port ...");
+		if (args != null && args.length>0) {
+			try {
+				port = new Integer(args[0]);
+			} catch (NumberFormatException e) {
+				log.log(Level.SEVERE, "Incorrect Port: " + args[0] + ". Cannot start server.");
+				throw new CoreException("Incorrect Port: " + args[0] + ". Cannot start server.",e);
+			}
+		}
+
+		log.log(Level.INFO, "Starting Server on port " + port + " ...");
 		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-
-		//CREATE SERVER CONTEXT & ASSIGN HANDLER:  FOR WEBAPP AND USER SERVICE
+		// CREATE SERVER CONTEXT & ASSIGN HANDLER: FOR WEBAPP AND USER
+		// SERVICE
 		HttpContext httpContext = server.createContext(AppController.applicationContext, new AppController());
-		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext, new UserServiceHttpHandler());
-		
-		ServiceBasicAuthenticator serviceAuth=new ServiceBasicAuthenticator();
-		httpServiceContext.setAuthenticator(serviceAuth);
-		
-	
+		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext,
+				new UserServiceHttpHandler());
 
-		//ASSIGN REUQEST FILTER FOR EACH HANDLER:  FOR WEBAPP AND USER SERVICE
+		ServiceBasicAuthenticator serviceAuth = new ServiceBasicAuthenticator();
+		httpServiceContext.setAuthenticator(serviceAuth);
+
+		// ASSIGN REUQEST FILTER FOR EACH HANDLER: FOR WEBAPP AND USER
+		// SERVICE
 		httpServiceContext.getFilters().add(new ServicesRequestFilter());
 		httpContext.getFilters().add(new HTTPRequestFilter());
 
-		//LOAD FLOW CONFIG, USER STORAGE AND SESSION
+		// LOAD FLOW CONFIG, USER STORAGE AND SESSION
 		FlowConfiguration.loadConfiguration();
-		UserDataStorage.loadUserDataStorage();   // No physical storage for this PoC. ONLY FOR ACADEMICAL PURPOSE!
+		UserDataStorage.loadUserDataStorage(); // No physical storage for this PoC. ONLY FOR ACADEMICAL PURPOSE!
 		UserSessionStorage.loadSessionStorage();
 
-		//INITS DEFAULT USERS
-		UserDAO<User> dao=new UserDAO<User>();
-		for(int i=0; i<defaultUsers.length; i++){
-			//UserDataStorage.getInstance().setUser(defaultUsers[i]);
+		// INITS DEFAULT USERS
+		UserDAO<User> dao = new UserDAO<User>();
+		for (int i = 0; i < defaultUsers.length; i++) {
 			dao.add(defaultUsers[i]);
 		}
 
-
-		//START SERVER
+		// START SERVER
 		server.start();
 
-		
 		log.log(Level.INFO, "Server Started successfully");
 
 	}

@@ -11,8 +11,7 @@ public class Page2 implements IViewLayer{
 	@Override
 	public String renderView(ViewBean viewBean) {
 		UserInfoBean userBean=(UserInfoBean)viewBean;
-		userBean.setForwardName("success");
-		System.out.println("SOY PAGINA 2. USER: "+userBean);	
+		userBean.setForwardName("success");	
 		return HelperWebappContentPages.getPageXContent(userBean.getUsername(),pageName);
 		
 	}

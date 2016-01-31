@@ -7,8 +7,16 @@ import com.schibsted.test.webapp.core.security.SecurityHelper;
 import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.User;
 import com.sun.net.httpserver.BasicAuthenticator;
-import com.sun.net.httpserver.HttpExchange;
 
+
+
+/**
+ * Basic http authenticator.
+ * TODO: Must implement authorization  
+ * 
+ * @author Anna
+ *
+ */
 @SuppressWarnings("restriction")
 public class ServiceBasicAuthenticator extends BasicAuthenticator{
 	public static final String SERVICE_AUTH="SERVICE_AUTH";
@@ -37,7 +45,8 @@ public class ServiceBasicAuthenticator extends BasicAuthenticator{
 
 	/*@Override
 	public Result authenticate(HttpExchange exchange) {
-		May be invoke checkCredentials from here ?
+		//TODO Needs to implement here the authorization getting user:password in base64 from header. To authenticate invoke checkCredentials.  
+		 
 	}*/
 	
 	

@@ -10,10 +10,7 @@ public class Page1 implements IViewLayer{
 
 	@Override
 	public String renderView(ViewBean viewBean) {
-		UserInfoBean userBean=(UserInfoBean)viewBean;
-		System.out.println("SOY PAGINA 1. USER: "+userBean.getUsername());		
-		System.out.println("forward del que vengo: "+userBean.getForwardName());	
-		
+		UserInfoBean userBean=(UserInfoBean)viewBean;		
 		return HelperWebappContentPages.getPageXContent(userBean.getUsername(),pageName);
 		
 		

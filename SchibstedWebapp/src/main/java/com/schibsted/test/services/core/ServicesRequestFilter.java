@@ -2,11 +2,17 @@ package com.schibsted.test.services.core;
 
 import java.io.IOException;
 
-import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
 import com.schibsted.test.webapp.core.controller.HelperController;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
+
+
+/**
+ * Generic filter for REST services
+ * @author Anna
+ *
+ */
 @SuppressWarnings("restriction")
 public class ServicesRequestFilter extends Filter{
 
@@ -16,11 +22,13 @@ public class ServicesRequestFilter extends Filter{
 		return null;
 	}
 
+	
+	/**
+	 * Sets standard response headers for REST services and validates HTTP methods allowed
+	 */
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
-		// TODO Auto-generated method stub
-		System.out.println("Filtre service - peticio intreceptada");
-		
+		// TODO Auto-generated method stub		
 		ServicesHelper.setResponseHeaders(exchange);
 		if(validateHTTPMethod(exchange)){
 			chain.doFilter(exchange);

@@ -26,7 +26,6 @@ public class ValidateUserAction implements IBusinessActionLayer{
 		LoginSessionBean sessionBean=new LoginSessionBean();
 		sessionBean.setForwardName(FORWARD_NOT_LOGGED);
 		
-		System.out.println("Getting POST parameters");
 		List<String> usernameList=requestParameters.get("username");
 		List<String> passwordList=requestParameters.get("password");
 		List<String> redirectTo=requestParameters.get("goesto");
@@ -56,8 +55,8 @@ public class ValidateUserAction implements IBusinessActionLayer{
 					}
 				}
 			} catch (DAOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				sessionBean.setForwardName("error");
+				// TODO: Global Error is needed to handle this errors!
 			}
 		}
 		

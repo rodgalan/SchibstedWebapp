@@ -70,12 +70,6 @@ public class UserSessionManager {
 		long now=new Date().getTime();
 		
 		return now<expirationTimeFromLasUserevent;
-		
-		/*long expirationTime=sessionBean.getLastRequestTimestamp();
-		Date afterAddingTenMins=new Date();
-		afterAddingTenMins.setTime(afterAddingTenMins.getTime()+ USER_SESSION_ALIVE_MINUTES * ONE_MINUTE_IN_MILLIS);
-		return lastUserEvent.compareTo(afterAddingTenMins)<0;*/
-		
 	}
 	
 	private static void updateUserSessionTimestamp(SessionBean sessionBean){
@@ -83,23 +77,4 @@ public class UserSessionManager {
 		sessionBean.setLastRequestTimestamp(newTimestamp);
 	}
 		
-	
-	/*private static String generateNewSessionId(){
-	      SecureRandom secureRandom=null;
-	      String sessionId=null;
-		try {
-			secureRandom = SecureRandom.getInstance("SHA1PRNG");
-			String randomNum = new Integer(secureRandom.nextInt()).toString();
-			MessageDigest sha = MessageDigest.getInstance("SHA-1");
-			byte[] result =  sha.digest(randomNum.getBytes());
-			sessionId=javax.xml.bind.DatatypeConverter.printHexBinary(result);
-		    System.out.println("Generating new session: "+sessionId);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 return sessionId;
-	}*/
-	
-
 }

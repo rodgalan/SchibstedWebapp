@@ -69,7 +69,6 @@ public class FlowConfiguration {
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			//flowConfiguration = (FlowConfig) jaxbUnmarshaller.unmarshal(file);
 			flowConfiguration = (FlowConfig) jaxbUnmarshaller.unmarshal(configStream);
-			System.out.println(flowConfiguration);
 		} catch (JAXBException e) {
 			// TODO Podemos crear una excepcion custom molona que se lance y al
 			// captiurarse en el main pare en server. eso mola mucho.
@@ -118,12 +117,6 @@ public class FlowConfiguration {
 		return optionalAction.map(action -> action.isAuthenticated()).orElse(false);
 	}
 	
-	/*public List<Role> getAutorizedRols(URI requestURI){
-		Optional<BusinessAction> optionalAction=getOptionalBusinessActionFromURI(requestURI);
-		Optional<List<Role>> optionalRolsList=optionalAction.map(roles -> roles.getAccesRoles()).map(rol -> rol.getRole());
-		return optionalRolsList.get();
-	}*/
-	
 	public String getAutorizedRol(URI requestURI){
 		String role=null;
 		Optional<BusinessAction> optionalAction=getOptionalBusinessActionFromURI(requestURI);
@@ -161,7 +154,6 @@ public class FlowConfiguration {
 	
 	
 	private Optional<BusinessAction> getOptionalBusinessActionFromURI(URI requestURI) {
-		//String path=HelperController.getPathFromURI(requestURI).trim().toLowerCase();
 		String path=HelperController.getPathFromURI(requestURI,AppController.applicationContext);
 		List<BusinessAction> actions=flowConfiguration.getBusinessAction();
 		Optional<BusinessAction> optionalAction=actions.stream().filter(action -> action.getPath().trim().toLowerCase().equals(path)).findFirst();

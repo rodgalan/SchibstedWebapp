@@ -11,7 +11,7 @@ import com.schibsted.test.webapp.core.session.UserSessionStorage;
 
 /**
  * Loggoff user session
- * Deletes user session in server side (not the cookie in client side!)
+ * Deletes user session in server side (cookie expiration is deleged to controller)
  * 
  * @author Anna
  *

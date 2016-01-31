@@ -5,6 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
+
+/**
+ * 
+ * USED TO ANNOTATE METHODS (IN CLASSES ANNOTED WITH RESTSERVICECLASS).
+ * FOR EACH METHOD IDENTIFIES HTTP METHOD AND RELATIVE URI  
+ * @author Anna
+ *
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD) //on class level
 public @interface Service {
