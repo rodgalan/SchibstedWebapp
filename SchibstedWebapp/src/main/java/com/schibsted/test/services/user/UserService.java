@@ -246,7 +246,7 @@ public class UserService {
 					switch (rolView) {
 					case "ADMIN":
 						if(hasAdmin){
-							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3 ");
 						}else{
 							modelRols.add(Rol.ADMIN);
 							hasAdmin=true;
