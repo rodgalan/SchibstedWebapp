@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://webapp.test.schibsted.com/services/beans"
-	xmlns:tns="http://webapp.test.schibsted.com/services/beans"
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.test.schibsted.com/user/bean"
+	xmlns:tns="http://services.test.schibsted.com/user/bean"
 	elementFormDefault="qualified">
 
 	<complexType name="RolsInfo">
 		<sequence>
 			<element type="string" name="rol" maxOccurs="unbounded"
-				minOccurs="1" />
+				minOccurs="1"/>
 		</sequence>
 	</complexType>
 
@@ -27,7 +27,6 @@
 				<element type="int" name="userId" maxOccurs="1" minOccurs="1" />
 				<element ref="tns:userInfo" maxOccurs="1" minOccurs="1" />
 				<element type="string" name="password" maxOccurs="1" minOccurs="1" />
-				<element type="int" name="userId" maxOccurs="1" minOccurs="1" />
 				<element type="string" name="nextLink" maxOccurs="1" minOccurs="1" />
 			</sequence>
 		</complexType>
