@@ -14,7 +14,7 @@ import com.sun.net.httpserver.HttpHandler;
 public class UserServiceHttpHandler implements HttpHandler {
 	
 	public static final String userServiceContext = "/service/users";
-
+	
 	//TODO CAPTURAR AQUI TOTES LES EXCEPCIONS NO TRACTADES INTERNAMENT I RETORNAR 500
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -59,21 +59,28 @@ public class UserServiceHttpHandler implements HttpHandler {
 				}
 				break;
 			case "DELETE":
-				service.deleteUser(exchange, requestPath);
+				if(requestPath.trim().startsWith("/")){
+					service.deleteUser(exchange, requestPath);
+				}else{
+					HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
+				}
 				break;
 			case "PUT":
-				service.addUsers(exchange, requestPath);
+				if(requestPath.trim().equals("")){
+					service.addUsers(exchange, requestPath);
+				}else{
+					HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
+				}
 				break;
 			case "POST":
-				if(requestPath.trim().equals("")){
+				if(requestPath.trim().startsWith("/")){
 					service.modifyUser(exchange, requestPath);
 				}else{
-					
+					HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
 				}
 				break;
 			default:
-				//TODO: Hi ha dos casos: url incorrecta o http method no acceptat o http method incorrecte. Alguns dells desde el filtre
-				HelperController.sendError(exchange, 406, "BLA BLA PENSAR ESTO");
+				HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
 				break;
 				
 			}

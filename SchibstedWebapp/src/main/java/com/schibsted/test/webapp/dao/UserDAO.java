@@ -40,7 +40,7 @@ public class UserDAO<T> implements IDAO<User>{
 	@Override
 	public User getByBusinessKey(String username) throws DAOException {
 		User user=null;
-		Predicate<User> predicate=us -> us.getUsername()==username;
+		Predicate<User> predicate=us -> us.getUsername().equals(username);
 		try {
 			user=UserDataStorage.getInstance().findUserByPredicate(predicate);
 		} catch (CloneNotSupportedException e) {

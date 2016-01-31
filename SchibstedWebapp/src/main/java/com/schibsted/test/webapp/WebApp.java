@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.schibsted.test.services.core.ServiceBasicAuthenticator;
 import com.schibsted.test.services.core.ServicesRequestFilter;
 import com.schibsted.test.services.user.UserServiceHttpHandler;
 import com.schibsted.test.webapp.core.controller.AppController;
@@ -76,6 +77,11 @@ public class WebApp {
 		//CREATE SERVER CONTEXT & ASSIGN HANDLER:  FOR WEBAPP AND USER SERVICE
 		HttpContext httpContext = server.createContext(AppController.applicationContext, new AppController());
 		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext, new UserServiceHttpHandler());
+		
+		ServiceBasicAuthenticator serviceAuth=new ServiceBasicAuthenticator();
+		httpServiceContext.setAuthenticator(serviceAuth);
+		
+	
 
 		//ASSIGN REUQEST FILTER FOR EACH HANDLER:  FOR WEBAPP AND USER SERVICE
 		httpServiceContext.getFilters().add(new ServicesRequestFilter());

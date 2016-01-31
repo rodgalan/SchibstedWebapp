@@ -30,6 +30,7 @@ import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.IRolTypes.Rol;
 import com.schibsted.test.webapp.model.User;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.Headers;
 
 @SuppressWarnings("restriction")
 @RESTServiceClass(basePath = UserServiceHttpHandler.userServiceContext, serviceName = "User")
@@ -37,7 +38,12 @@ public class UserService {
 
 	@Service(method = HttpMethods.GET, relativeURI = "")
 	public void getUsers(HttpExchange exchange, String relativePath) throws IOException {
+		
+		
 		System.out.println("UserService.getUsers");
+		Headers he=exchange.getRequestHeaders();
+		System.out.println(he.values().toString());
+
 		UserDAO<User> dao = new UserDAO<User>();
 		List<User> users;
 		try {
@@ -237,22 +243,45 @@ public class UserService {
 			userModel.setUsername(userView.getUsername());
 			if (userView.getRolsInfo() != null && userView.getRolsInfo().getRol() != null
 					&& !userView.getRolsInfo().getRol().isEmpty()) {
+				List<Rol> modelRols = new ArrayList<Rol>();
 				for (String rolView : userView.getRolsInfo().getRol()) {
 					// TODO: We must have only one enum of ROLE
-					List<Rol> modelRols = new ArrayList<Rol>();
 					userModel.setRols(modelRols);
+					
+					//Not to add the same rol twice
+					boolean hasAdmin=false;boolean hasP1=false;boolean hasP2=false;boolean hasP3=false;
 					switch (rolView) {
 					case "ADMIN":
-						modelRols.add(Rol.ADMIN);
+						if(hasAdmin){
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+						}else{
+							modelRols.add(Rol.ADMIN);
+							hasAdmin=true;
+						}
 						break;
 					case "PAGE1":
-						modelRols.add(Rol.PAGE1);
+						if(hasP1){
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+						}else{
+							modelRols.add(Rol.PAGE1);
+							hasP1=true;
+						}
 						break;
 					case "PAGE2":
-						modelRols.add(Rol.PAGE2);
+						if(hasP2){
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+						}else{
+							modelRols.add(Rol.PAGE2);
+							hasP2=true;
+						}
 						break;
 					case "PAGE3":
-						modelRols.add(Rol.PAGE3);
+						if(hasP3){
+							throw new RolException("ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE " + Rol.values().toString());
+						}else{
+							modelRols.add(Rol.PAGE3);
+							hasP3=true;
+						}
 						break;
 					default:
 						throw new RolException(
