@@ -2,6 +2,8 @@ package com.schibsted.test.services.core;
 
 import java.io.IOException;
 
+import com.schibsted.test.webapp.controller.flowconfig.beans.BusinessAction;
+import com.schibsted.test.webapp.core.controller.HelperController;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -20,8 +22,31 @@ public class ServicesRequestFilter extends Filter{
 		System.out.println("Filtre service - peticio intreceptada");
 		
 		ServicesHelper.setResponseHeaders(exchange);
-		chain.doFilter(exchange);
-		
+		if(validateHTTPMethod(exchange)){
+			chain.doFilter(exchange);
+		}
+	}
+	
+	
+	
+	private boolean validateHTTPMethod(HttpExchange exchange) throws IOException {
+		String rqMethod = exchange.getRequestMethod();
+		boolean ok = true;
+
+		// 1. Validate standard value
+		if (rqMethod == null || (!rqMethod.equals("GET") && !rqMethod.equals("POST") && !rqMethod.equals("PUT")
+				&& !rqMethod.equals("DELETE") && !rqMethod.equals("PUT") && !rqMethod.equals("OPTIONS")
+				&& !rqMethod.equals("HEAD") && !rqMethod.equals("TRACE") && !rqMethod.equals("CONNECT"))) {
+			HelperController.sendError(exchange, 406, "NOT ACCEPTABLE");
+			ok = false;
+		} else {
+			if (rqMethod == null || (!rqMethod.equals("GET") && !rqMethod.equals("POST") && !rqMethod.equals("PUT")
+					&& !rqMethod.equals("DELETE"))) {
+				HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
+				ok = false;
+			}
+		}
+		return ok;
 	}
 	
 	

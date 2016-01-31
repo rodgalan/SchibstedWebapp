@@ -65,7 +65,11 @@ public class UserServiceHttpHandler implements HttpHandler {
 				service.addUsers(exchange, requestPath);
 				break;
 			case "POST":
-				service.modifyUser(exchange, requestPath);
+				if(requestPath.trim().equals("")){
+					service.modifyUser(exchange, requestPath);
+				}else{
+					
+				}
 				break;
 			default:
 				//TODO: Hi ha dos casos: url incorrecta o http method no acceptat o http method incorrecte. Alguns dells desde el filtre

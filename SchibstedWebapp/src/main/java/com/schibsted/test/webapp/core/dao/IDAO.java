@@ -7,7 +7,7 @@ import com.schibsted.test.webapp.core.exceptions.DAOException;
 
 public interface IDAO<T> {
 	
-	public boolean add(T t) throws DAOException;
+	public Integer add(T t) throws DAOException;
     public boolean update(T t) throws DAOException;
     public boolean remove(int index) throws DAOException;
     public T getById(int index) throws DAOException;

@@ -100,16 +100,13 @@ public class UserDataStorage {
 	
 	
 	// Modifying data, thread-safety acces to object users list
-	public boolean setUser(User user){
-		boolean ok=false;
+	public Integer setUser(User user){
 		user.setUserId(++usersIdCount);
 		log.log(Level.FINE, "UserDataStorage.setUser with userId=" + user.toString());
 		synchronized (users) {
-			int sizeBefore=users.size();
 			users.put(user.getUserId(), user);
-			ok=sizeBefore<users.size();
 		}
-		return ok;
+		return user.getUserId();
 	}
 	
 	// Modifying data, thread-safety acces to object users list

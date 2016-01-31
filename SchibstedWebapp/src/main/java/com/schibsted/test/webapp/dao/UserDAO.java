@@ -11,7 +11,7 @@ import com.schibsted.test.webapp.model.User;
 public class UserDAO<T> implements IDAO<User>{
 
 	@Override
-	public boolean add(User user) throws DAOException {
+	public Integer add(User user) throws DAOException {
 		return UserDataStorage.getInstance().setUser(user);
 	}
 
