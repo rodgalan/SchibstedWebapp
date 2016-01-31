@@ -33,6 +33,7 @@ public class HTTPRequestFilter extends Filter {
 		boolean ok = false;
 
 		
+		HelperController.setResponseHeaders(exchange);
 		if (this.validateResource(exchange)) {
 			// if(contentTypeValidation(exchange));
 
@@ -48,62 +49,6 @@ public class HTTPRequestFilter extends Filter {
 		if(ok){
 			chain.doFilter(exchange);
 		}
-
-		// Validate user authentication
-		/*if (actionBean.isAuthenticated()) {
-			System.out.println("valida sesion");
-			if (!cookieSessionValidation(exchange)) {
-
-				// HelperController.sendStaticView(exchange,"/loginNOK.html");
-				// //este estaba
-				// HelperController.sendStaticView(exchange,"/login"); //este no
-				// deberia ir
-
-				LoginPageBean viewBean = new LoginPageBean();
-				viewBean.setMessage("RESTRICTED ACCES TO " + requestURI.getPath()
-						+ ". YOU MUST BE AUTHENTICATED. PLEASE, DO A LOGIN: ");
-				viewBean.setOriginalRequest(HelperController.getPathFromURI(requestURI));
-				try {
-					HelperController.sendDynamicView(exchange, "com.schibsted.test.webapp.view.LoginView", viewBean);
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				correctAcces = false;
-			} else {
-
-				// VALIDATE USER AUTHORIZATION
-				// if(FlowConfiguration.getInstance().isAuthorizatedURI(requestURI))
-				if (actionBean.getAccesRole() != null && !actionBean.getAccesRole().isEmpty()) {
-					// Getting user from sessionId
-					String sessionId = HelperController.getSessionIdFromCookie(exchange);
-					Integer userId = UserSessionManager.getUserIdBySessionId(sessionId,
-							UserSessionStorage.getInstance());
-					UserDAO<User> dao = new UserDAO<User>();
-					try {
-						User user = dao.getById(userId);
-						List<Rol> userRoles = user.getRols();
-						String a = userRoles.get(0).toString();
-
-						Optional<Rol> optionalRol = userRoles.stream()
-								.filter(rol -> rol.toString().equals(actionBean.getAccesRole().toUpperCase()))
-								.findFirst();
-						if (!optionalRol.isPresent()) {
-							System.out.println("USUARI NO AUTORIZAT!");
-							HelperController.sendError(exchange, 403, "FORBIDEN");
-							correctAcces = false;
-						}
-					} catch (DAOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		if (correctAcces) {
-			chain.doFilter(exchange);
-		}*/
 	}
 
 	// TODO: NOT WORKS

@@ -1,23 +1,29 @@
 package com.schibsted.test.services.user;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import com.schibsted.test.services.core.RESTServiceClass;
 import com.schibsted.test.services.core.Service;
 import com.schibsted.test.services.core.Service.HttpMethods;
+import com.schibsted.test.services.core.ServicesHelper;
 import com.schibsted.test.services.user.bean.RolsInfo;
 import com.schibsted.test.services.user.bean.UserInfo;
-import com.schibsted.test.services.user.bean.UserServiceBean;
+import com.schibsted.test.services.user.bean.UsersInfo;
 import com.schibsted.test.webapp.core.controller.HelperController;
 import com.schibsted.test.webapp.core.exceptions.DAOException;
+import com.schibsted.test.webapp.core.exceptions.RolException;
 import com.schibsted.test.webapp.dao.UserDAO;
 import com.schibsted.test.webapp.model.IRolTypes.Rol;
 import com.schibsted.test.webapp.model.User;
@@ -27,9 +33,24 @@ import com.sun.net.httpserver.HttpExchange;
 public class UserService {
 	
 	@Service(method=HttpMethods.GET,relativeURI="")
-	public void getUsers(HttpExchange exchange){
+	public void getUsers(HttpExchange exchange,  String relativePath) throws IOException{
 		System.out.println("UserService.getUsers");
-		
+		UserDAO<User> dao = new UserDAO<User>();
+		List<User> users;
+		try {
+			users = dao.getAll();
+			List<UserInfo> usersView=new ArrayList<UserInfo>();
+			if(usersView!=null){
+				for(User user : users){
+					usersView.add(mapUserModelToUserService(user));
+				}
+			}
+			sendUsersXML(usersView,exchange);
+		} catch (DAOException e) {
+			HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+		} catch (JAXBException e) {
+			HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+		}
 		
 	}
 	
@@ -47,18 +68,51 @@ public class UserService {
 					//String json=getJsonObject(userService);
 					sendUserXML(userInfo, exchange); 
 				}else{
-					HelperController.sendError(exchange, 400, "BAD REQUEST. INVALID ENTITY");
+					HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
 				}
 			} catch (DAOException e) {
 				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			}
+		}else{
+			HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
 		}
 	}
 	
 	@Service(method=HttpMethods.POST,relativeURI="/{userId}")
-	public void modifyUser(HttpExchange exchange, String relativePath){
+	public void modifyUser(HttpExchange exchange, String relativePath) throws IOException{
 		System.out.println("UserService.modifyUsers");
+		Integer userId=getUserId(relativePath);
+		String message = ServicesHelper.getMessageFromRequest(exchange);
+		System.out.println(message);
+		if(message!=null && userId!=null){
+			try {
+				UserInfo userInfo=getUserInfoFromXML(message);
+				User user=null;
+				try {
+					user = mapUserServiceToUserModel(userInfo);
+				} catch (RolException e) {
+					HelperController.sendError(exchange, 400, "BAD REQUEST. "+e.getMessage());
+				}
+				UserDAO<User> dao = new UserDAO<User>();
+				user.setUserId(userId);
+				//sets userId (from query) and password (from original message) - this two cannot be updated here.
+				User originalUser=dao.getById(userId);
+				user.setPasssword(originalUser.getPasssword());
+				boolean result=dao.update(user);
+				if(result){
+					HelperController.sendError(exchange, 204, "USER MODIFIED");
+				}else{
+					HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
+				}
 
+			} catch (JAXBException e) {
+				HelperController.sendError(exchange, 400, "BAD REQUEST. MALFORMED MESSAGE");
+			} catch (DAOException e) {
+				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
+			}
+		}else{
+			HelperController.sendError(exchange, 400, "BAD REQUEST. MALFORMED MESSAGE (body and userId cannot be null)");
+		}
 	}
 	
 	@Service(method=HttpMethods.PUT,relativeURI="/{userId}")
@@ -67,7 +121,7 @@ public class UserService {
 	}
 	
 	@Service(method=HttpMethods.DELETE,relativeURI="/{userId}")
-	public void DeleteUser(HttpExchange exchange, String relativePath) throws IOException{
+	public void deleteUser(HttpExchange exchange, String relativePath) throws IOException{
 		System.out.println("UserService.deleteUsers");
 		Integer userId=getUserId(relativePath);
 	
@@ -78,11 +132,13 @@ public class UserService {
 				if(ok){
 					HelperController.sendError(exchange, 204, "NO CONTENT. USER HAVE BEEN DELETED");
 				}else{
-					HelperController.sendError(exchange, 400, "BAD REQUEST. INVALID ENTITY");
+					HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
 				}
 			} catch (DAOException e) {
 				HelperController.sendError(exchange, 500, "INTERNAL SERVER ERROR");
 			}
+		}else{
+			HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
 		}
 	}
 	
@@ -115,30 +171,43 @@ public class UserService {
 	
 	private static UserInfo mapUserModelToUserService(User userModel) {
 		UserInfo userView = null;
-		new UserServiceBean();
 		if (userModel != null && userModel.getUserId() != null) {
 			userView = new UserInfo();
 			userView.setUserId(userModel.getUserId());
 			userView.setUsername(userModel.getUsername());
 			
 			RolsInfo rols=new RolsInfo();
+			userView.setRolsInfo(rols);
 			if(userModel.getRols()!=null && !userModel.getRols().isEmpty()){
-				List<String> rolList = new ArrayList<String>();
 				for (Rol rol : userModel.getRols()){
-					rolList.add(rol.toString());
+					rols.getRol().add(rol.toString());
 				}
 			}
 		}
 		return userView;
 	}
 
-	private static User mapUserServiceToUserModel(UserServiceBean userView) {
+	private static User mapUserServiceToUserModel(UserInfo userView) throws RolException {
 		User userModel = null;
 		if (userView != null) {
 			userModel = new User();
 			userModel.setUserId(userView.getUserId());
 			userModel.setUsername(userView.getUsername());
-			userModel.setRols(userView.getRols());
+			if(userView.getRolsInfo()!=null && userView.getRolsInfo().getRol()!=null && !userView.getRolsInfo().getRol().isEmpty()){
+				for(String rolView : userView.getRolsInfo().getRol()){
+					//CUTRE, tot hauria de ser el mateix ROL :(
+					 List<Rol> modelRols=new ArrayList<Rol>();
+					 userModel.setRols(modelRols);
+					 switch(rolView){
+						case "ADMIN": modelRols.add(Rol.ADMIN);break;
+						case "PAGE1": modelRols.add(Rol.PAGE1);break;
+						case "PAGE2": modelRols.add(Rol.PAGE2);break;
+						case "PAGE3": modelRols.add(Rol.PAGE3);break;
+						default: 
+							throw new RolException("ROL "+rolView+" NOT ALLOWED. ALLOWED VALUES ARE "+Rol.values().toString());
+					}
+				}
+			}
 		}
 		return userModel;
 	}
@@ -157,4 +226,33 @@ public class UserService {
 			os.close();
 		}
 	}
+	
+	private void sendUsersXML(List<UserInfo> usersView, HttpExchange exchange) throws JAXBException, IOException{
+		UsersInfo usersInfo=new UsersInfo();
+		for(UserInfo user :usersView){
+			usersInfo.getUserInfo().add(user);
+		}
+		
+		JAXBContext jaxbContext = JAXBContext.newInstance(UsersInfo.class);
+		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+		//Can't use mashal to outputstream, we need size :(
+		StringWriter writer=new StringWriter();
+		jaxbMarshaller.marshal(usersInfo, writer);
+		exchange.sendResponseHeaders(200, writer.getBuffer().length());
+		OutputStream os=exchange.getResponseBody();
+		try{
+			os.write(writer.toString().getBytes());
+		}finally{
+			os.close();
+		}
+	}
+	
+	private UserInfo getUserInfoFromXML(String message) throws JAXBException, IOException{
+		JAXBContext jaxbContext = JAXBContext.newInstance(UserInfo.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		InputStream streamMessage = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+		UserInfo userInfo = (UserInfo) jaxbUnmarshaller.unmarshal(streamMessage);
+		return userInfo;
+	}
+	
 }

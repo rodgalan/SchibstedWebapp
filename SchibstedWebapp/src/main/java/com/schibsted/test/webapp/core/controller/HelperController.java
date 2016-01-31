@@ -44,7 +44,7 @@ public class HelperController {
 	
 	
 	public static void redirectPage(HttpExchange exchange, String newLocation, ViewBean bean) throws IOException { 
-		setResponseHeaders(exchange);
+		//setResponseHeaders(exchange);
 		if(bean!=null && bean.getMessage()!=null && !bean.getMessage().isEmpty()){
 			newLocation=newLocation.concat("?").concat("message=").concat(bean.getMessage());
 		}
@@ -80,7 +80,7 @@ public class HelperController {
 	 * @throws IOException
 	 */
 	public static void sendError(HttpExchange exchange, int httpStatusError , String httpStatusDescription) throws IOException {
-		setResponseHeaders(exchange);
+		//setResponseHeaders(exchange);
 		exchange.sendResponseHeaders(httpStatusError, httpStatusDescription.length());
 		OutputStream os = exchange.getResponseBody();
 		try{
@@ -98,7 +98,7 @@ public class HelperController {
 		IViewLayer view = (IViewLayer) viewClassImpl.newInstance();
 		String response = view.renderView(viewBean);
 
-		setResponseHeaders(exchange);
+		//setResponseHeaders(exchange);
 		exchange.sendResponseHeaders(200, response.length());
 
 		OutputStream os = exchange.getResponseBody();
@@ -130,7 +130,7 @@ public class HelperController {
 		}
 		
 		
-		setResponseHeaders(exchange);
+		//setResponseHeaders(exchange);
 		exchange.sendResponseHeaders(200, strhtml.length()); // redirect
 		
 		try{

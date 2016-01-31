@@ -2,7 +2,7 @@ package com.schibsted.test.webapp.core.exceptions;
 
 public class DAOException extends CoreException{
 
-	private static final long serialVersionUID = 4L;
+	private static final long serialVersionUID = 688270072411391972L;
 
 	public DAOException(String message, Throwable cause) {
 		super(message, cause);

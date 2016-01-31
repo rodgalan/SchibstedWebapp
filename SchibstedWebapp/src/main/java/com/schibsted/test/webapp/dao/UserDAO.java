@@ -1,5 +1,6 @@
 package com.schibsted.test.webapp.dao;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.schibsted.test.webapp.core.dao.IDAO;
@@ -11,20 +12,17 @@ public class UserDAO<T> implements IDAO<User>{
 
 	@Override
 	public boolean add(User user) throws DAOException {
-		UserDataStorage.getInstance().setUser(user);
-		return true;
+		return UserDataStorage.getInstance().setUser(user);
 	}
 
 	@Override
 	public boolean update(User user) throws DAOException {
-		UserDataStorage.getInstance().modifyUser(user);
-		return false;
+		return UserDataStorage.getInstance().modifyUser(user);
 	}
 
 	@Override
 	public boolean remove(int userId) throws DAOException {
-		UserDataStorage.getInstance().deleteUser(userId);
-		return false;
+		return UserDataStorage.getInstance().deleteUser(userId);
 	}
 
 	@Override
@@ -62,5 +60,32 @@ public class UserDAO<T> implements IDAO<User>{
 		}
 		return user;
 	}
+
+	@Override
+	public List<User> getAll() throws DAOException {
+		List<User> users;
+		Predicate<User> filterCondition=u->u.getUserId()!=null;
+		try {
+			users = UserDataStorage.getInstance().findUsersByPredicate(filterCondition);
+		} catch (CloneNotSupportedException e) {
+			throw new DAOException("UserDAO.findItemsByCondition. filterCondition="+filterCondition.toString(), e);
+		}
+		return users;
+	}
+
+	@Override
+	public List<User> findItemsByCondition(Predicate<User> filterCondition) throws DAOException {
+		List<User> users;
+		try {
+			users = UserDataStorage.getInstance().findUsersByPredicate(filterCondition);
+		} catch (CloneNotSupportedException e) {
+			throw new DAOException("UserDAO.findItemsByCondition. filterCondition="+filterCondition.toString(), e);
+		}
+		return users;
+	}
+	
+	
+	
+	
 
 }

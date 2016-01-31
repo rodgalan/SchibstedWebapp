@@ -1,11 +1,12 @@
-package com.schibsted.test.services.user;
+package com.schibsted.test.services.core;
 
 import java.io.IOException;
 
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
-public class UserServiceRequestFilter extends Filter{
+@SuppressWarnings("restriction")
+public class ServicesRequestFilter extends Filter{
 
 	@Override
 	public String description() {
@@ -17,6 +18,8 @@ public class UserServiceRequestFilter extends Filter{
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
 		// TODO Auto-generated method stub
 		System.out.println("Filtre service - peticio intreceptada");
+		
+		ServicesHelper.setResponseHeaders(exchange);
 		chain.doFilter(exchange);
 		
 	}

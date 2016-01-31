@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.schibsted.test.services.user.UserServiceRequestFilter;
+import com.schibsted.test.services.core.ServicesRequestFilter;
 import com.schibsted.test.services.user.UserServiceHttpHandler;
 import com.schibsted.test.webapp.core.controller.AppController;
 import com.schibsted.test.webapp.core.controller.FlowConfiguration;
@@ -32,12 +32,10 @@ public class WebApp {
 	
 	// Aixo ens ho podem endur a un fitxer de configuracio del server
 	private static int port = 8080;
-	/*public static String applicationContext = "/webapp/";
-	public static String userServiceContext = "/service/users";*/
 
 	/*
 	 * DEFAULT USERS
-	 * TODO IMPORVE TO CONFIG FILE
+	 * TODO IMPROVE TO CONFIG FILE
 	 */
 	private static final String defaultAdminUserName = "admin";
 	private static final String defaultAdminUserPassword = "admin";
@@ -80,7 +78,7 @@ public class WebApp {
 		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext, new UserServiceHttpHandler());
 
 		//ASSIGN REUQEST FILTER FOR EACH HANDLER:  FOR WEBAPP AND USER SERVICE
-		httpServiceContext.getFilters().add(new UserServiceRequestFilter());
+		httpServiceContext.getFilters().add(new ServicesRequestFilter());
 		httpContext.getFilters().add(new HTTPRequestFilter());
 
 		//LOAD FLOW CONFIG, USER STORAGE AND SESSION
