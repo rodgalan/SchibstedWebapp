@@ -278,7 +278,7 @@ public class UserService {
 						break;
 					default:
 						throw new RolException(
-								"ROL " + rolView + " NOT ALLOWED. ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
+								"ROL " + rolView + " NOT ALLOWED.ALLOWED VALUES ARE ADMIN,PAGE1,PAGE2,PAGE3");
 					}
 				}
 			}
