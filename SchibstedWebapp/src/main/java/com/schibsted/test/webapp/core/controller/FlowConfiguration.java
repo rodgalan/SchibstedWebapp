@@ -32,7 +32,8 @@ public class FlowConfiguration {
 	private static final Logger log = Logger.getLogger(WebApp.class.getName());
 	private static FlowConfig flowConfiguration;
 	
-	private final static String CONF_FILE_PATH="/resources/config/configuration.xml";
+	//private final static String CONF_FILE_PATH="/resources/config/configuration.xml";
+	private final static String CONF_FILE_PATH="/config/configuration.xml";
 
 	// private static volatile FlowConfiguration instance = null; LAZY LOADING
 	// NOT NEEDED

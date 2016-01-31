@@ -40,7 +40,7 @@ public class HelperController {
 	//Base file path om wich static pages are allocated. 
 	//TODO GETS BETTER in config file!!
 	//static final String baseFileViewPath = "C:/Users/Anna/workspaceSH_Mars1/webapp/src/main/webapp/WEB-INF/views";
-	private final static String BASE_STATIC_VIEW_PATH="/resources/staticViews";
+	private final static String BASE_STATIC_VIEW_PATH="/staticViews";
 	
 	
 	public static void redirectPage(HttpExchange exchange, String newLocation, ViewBean bean) throws IOException { 
