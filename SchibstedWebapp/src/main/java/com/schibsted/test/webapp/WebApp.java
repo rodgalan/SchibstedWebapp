@@ -3,6 +3,7 @@ package com.schibsted.test.webapp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,6 +85,12 @@ public class WebApp {
 		HttpContext httpContext = server.createContext(AppController.applicationContext, new AppController());
 		HttpContext httpServiceContext = server.createContext(UserServiceHttpHandler.userServiceContext,
 				new UserServiceHttpHandler());
+		
+		server.setExecutor(Executors.newCachedThreadPool());
+		/*
+		 * // Set an Executor for the multi-threading
+        server.setExecutor(Executors.newCachedThreadPool());
+		 */
 
 		ServiceBasicAuthenticator serviceAuth = new ServiceBasicAuthenticator();
 		httpServiceContext.setAuthenticator(serviceAuth);
