@@ -41,6 +41,7 @@ import com.sun.net.httpserver.HttpExchange;
 @SuppressWarnings("restriction")
 @RESTServiceClass(basePath = UserServiceHttpHandler.userServiceContext, serviceName = "User")
 public class UserService {
+	
 
 	@Service(method = HttpMethods.GET, relativeURI = "")
 	public void getUsers(HttpExchange exchange, String relativePath) throws IOException {
@@ -71,9 +72,18 @@ public class UserService {
 			try {
 				User userModel = dao.getById(userId);
 				if (userModel != null) {
-					UserInfo userInfo = mapUserModelToUserService(userModel);
-					// String json=getJsonObject(userService);
-					sendUserXML(userInfo, exchange);
+					int contentType=getRequestContentType(exchange);
+					
+					if(contentType==JSON){
+						String json=createUserInfoJson(userModel);
+						sendUserJson(json,exchange);
+					}else if(contentType==XML){
+						UserInfo userInfo = mapUserModelToUserService(userModel);
+						sendUserXML(userInfo, exchange);
+					}else{
+						HelperController.sendError(exchange, 405, "METHOD NOT ALLOWED");
+					}
+					
 				} else {
 					HelperController.sendError(exchange, 422, "UNPROCESSABLE ENTITY. INVALID ENTITY");
 				}
@@ -188,6 +198,66 @@ public class UserService {
 	 * *** PRIVATE METHODS
 	 ***/
 
+	
+	/**
+	 * If xml returns 0, if json returns 1 else returns 0
+	 * @return
+	 */
+	
+	private static final int XML=0;
+	private static final int JSON=1;
+	private int getRequestContentType(HttpExchange exchange){
+		int result=-1;
+		String requestContentType=exchange.getRequestHeaders().getFirst("Content-Type");
+		if(requestContentType!=null){
+			if( (requestContentType.trim().contains("text/xml") || requestContentType.trim().contains("application/xml") ) && !requestContentType.trim().equals("application/json")){
+				result=XML;
+			}else if (requestContentType.trim().equals("application/json") && (!requestContentType.trim().contains("text/xml") && !requestContentType.trim().contains("application/xml") )){
+				result=JSON;
+			}
+		}
+		return result;
+	}
+	
+	private void sendUserJson(String json , HttpExchange exchange) throws IOException {
+		exchange.getResponseHeaders().add("Content-type", "application/json; charset=utf-8");
+		exchange.sendResponseHeaders(200, json.length());
+		if(json!=null){
+			exchange.getResponseBody().write(json.getBytes());
+		}
+	}
+	
+	
+	private String createUserInfoJson(User user){
+		String jsonUserInfo_str="{ \"userInfo\": {\"username\": \"".concat(user.getUsername()).concat("\"") ;
+		if(user.getRols()!=null && !user.getRols().isEmpty()) {
+			jsonUserInfo_str=jsonUserInfo_str.concat(",");
+			jsonUserInfo_str=jsonUserInfo_str.concat(addJsonRols(user.getRols())).concat("}}");
+		}
+		return jsonUserInfo_str;
+	}
+		
+			
+		
+	private String addJsonRols(List<Rol> rols){
+		String rolsJson="";
+		if(rols!=null && !rols.isEmpty()){
+			rolsJson="  \"rolsInfo\": {\"rol\": [";
+			int count=0;
+			for(Rol rol : rols){
+				rolsJson=rolsJson.concat("\"").concat(rol.toString()).concat("\"");
+				count++;
+				if(count<rols.size()){
+					rolsJson=rolsJson.concat(",");
+				}
+			}
+			rolsJson=rolsJson.concat("]}");
+		}
+		return rolsJson;
+	}
+	
+	
+	
 	private Integer getUserId(String relativePath) {
 		Integer userId = null;
 		String userIdParam = relativePath.substring(relativePath.indexOf("/") + 1);
@@ -292,6 +362,7 @@ public class UserService {
 		// Can't use mashal to outputstream, we need size :(
 		StringWriter writer = new StringWriter();
 		jaxbMarshaller.marshal(user, writer);
+		exchange.getResponseHeaders().add("Content-type", "application/xml; charset=utf-8");
 		exchange.sendResponseHeaders(200, writer.getBuffer().length());
 		OutputStream os = exchange.getResponseBody();
 		try {
@@ -301,6 +372,11 @@ public class UserService {
 		}
 	}
 
+	
+	
+	
+	
+	
 	private void sendUsersXML(List<UserInfo> usersView, HttpExchange exchange) throws JAXBException, IOException {
 		UsersInfo usersInfo = new UsersInfo();
 		for (UserInfo user : usersView) {
@@ -312,6 +388,7 @@ public class UserService {
 		// Can't use mashal to outputstream, we need size :(
 		StringWriter writer = new StringWriter();
 		jaxbMarshaller.marshal(usersInfo, writer);
+		exchange.getResponseHeaders().add("Content-type", "application/xml; charset=utf-8");
 		exchange.sendResponseHeaders(200, writer.getBuffer().length());
 		OutputStream os = exchange.getResponseBody();
 		try {
@@ -327,6 +404,7 @@ public class UserService {
 		// Can't use mashal to outputstream, we need size :(
 		StringWriter writer = new StringWriter();
 		jaxbMarshaller.marshal(user, writer);
+		exchange.getResponseHeaders().add("Content-type", "application/xml; charset=utf-8");
 		exchange.sendResponseHeaders(200, writer.getBuffer().length());
 		OutputStream os = exchange.getResponseBody();
 		try {
