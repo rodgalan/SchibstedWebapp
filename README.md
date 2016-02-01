@@ -73,15 +73,15 @@ User entity (XML representation example):
 		</userInfo>	
 		
 # Local enviroment used for developement and testing
-
-Eclipse Mars.1 Release (4.5.1)
-Project encoding UTF-8
-Apache Maven 3.3.9 
-Java version: 1.8.0_51, vendor: Oracle Corporation
-Default locale: es_ES, platform encoding: Cp1252
-OS name: "windows 7", version: "6.1", arch: "amd64", family: "dos
+- Eclipse Mars.1 Release (4.5.1)
+- Project encoding UTF-8
+- Apache Maven 3.3.9 
+- Java version: 1.8.0_51, vendor: Oracle Corporation
+- Default locale: es_ES, platform encoding: Cp1252
+- OS name: "windows 7", version: "6.1", arch: "amd64", family: "dos
 
 #Identified bugs (pending to fix)
 - Multithreading problems
+
 
 
