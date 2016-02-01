@@ -36,8 +36,8 @@ Or on a specific another port
 #Web application
 WebApp Context: /webapp
 	
-	- Login page: 		/login 	(No authentication required)
-	- Page 1: 			/page1 	(Page under authentication and authorization PAGE1)
+	- Login page: 			/login 		(No authentication required)
+	- Page 1: 			/page1 		(Page under authentication and authorization PAGE1)
 	- Page 2: 			/page2		(Page under authentication and authorization PAGE2)
 	- Page 3: 			/page3		(Page under authentication and authorization PAGE3)
 
@@ -54,11 +54,11 @@ Authorization is not implemented yet. Next release must restrict access to resou
 	
 Base Service path: /service/users
 	
-	- /service/users 				+ GET :		Get Users lists
+	- /service/users 		+ GET :		Get Users lists
 	- /service/users/{$userId} 	+ GET: 		Get {$userId} detail
-	- /service/users/{$userId} 	+ DELETE:		Delete user {$userId}
-	- /service/users 				+ PUT: 		Add new user
-	- /service/users/{$userId} 	+ POST: 		Modifies {$userId} data and rols 
+	- /service/users/{$userId} 	+ DELETE:	Delete user {$userId}
+	- /service/users 		+ PUT: 		Add new user
+	- /service/users/{$userId} 	+ POST: 	Modifies {$userId} data and rols 
 	
 Service messages definition (at this version only XML, and afirst non tested version of JSON service GET + /service/users/{$userId}
 
@@ -82,6 +82,18 @@ User entity (XML representation example):
 
 #Identified bugs (pending to fix)
 - Multithreading problems
+
+#Design
+- Controller : custom framewrok developed to configure flow navigation in XML file. Each user reuquest is delegated to appropiate business action. It manages the authorization acces to resources.
+- Model: Simple beans (Pojo)
+- Views: After a busniess action is finisehd, controller delegates the creation of view to View component. Views can be static (html) or dynamic (java generating html code), or simply a redirect location.
+- ViewBeans: Object containing data to pass information between business action and view.
+- DAO: Decoupled form data origin with an interface defining methods that must be implemented by every DAO implemenetation. At this release there aren't a Factory provided (to improve in next releases)
+- Data Storagge: Data are not persisted for this PoC. All user data is cached in a singleton. To simulate physical storage and ensures values are not modified directly (always must be done by dao layer), singleton returns cloned objects.
+- HTTP Session for webapp: provided by client side cookie and saved at server side in a  singleton.
+- Handlers and filters: Webapp and User service has it's own handler and filter. Handler recieives all user requests that has not been discared previously by filter. 
+- Http Basic authorization for REST service is provider by an Authenticator.
+- REST services: two custom annotations have been developed. Service handler delegates to appropiate service executor annotated with relative uri (and query string) and http method. (*) Actually there a bug and a woraround is provided (switch condition in handler).
 
 
 
