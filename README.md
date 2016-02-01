@@ -21,7 +21,7 @@ Server can be started on default port (8080):
 	java -jar webapp-0.0.1-SNAPSHOT.jar
 
 Or on a specific another port
-	java -jar webapp-0.0.1-SNAPSHOT.jar <port>
+	java -jar webapp-0.0.1-SNAPSHOT.jar {$port}
 
 #Default users
 4 users have been created for testing purposes. These users can be used in both, Web application and REST services. 
